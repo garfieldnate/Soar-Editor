@@ -1,0 +1,125 @@
+K 25
+svn:wc:ra_dav:version-url
+V 126
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules
+END
+FlagRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 140
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/FlagRule.java
+END
+RegexRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 141
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/RegexRule.java
+END
+FlagDetector.java
+K 25
+svn:wc:ra_dav:version-url
+V 144
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/FlagDetector.java
+END
+BraceRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 141
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/BraceRule.java
+END
+BlockCommentRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 148
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/BlockCommentRule.java
+END
+CommandRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 143
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/CommandRule.java
+END
+CommandDetector.java
+K 25
+svn:wc:ra_dav:version-url
+V 147
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/CommandDetector.java
+END
+TclRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 139
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/TclRule.java
+END
+TclDetector.java
+K 25
+svn:wc:ra_dav:version-url
+V 143
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/TclDetector.java
+END
+KeywordRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 143
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/KeywordRule.java
+END
+VariableRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 144
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/VariableRule.java
+END
+FunctionRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 144
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/FunctionRule.java
+END
+KeywordDetector.java
+K 25
+svn:wc:ra_dav:version-url
+V 147
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/KeywordDetector.java
+END
+FunctionDetector.java
+K 25
+svn:wc:ra_dav:version-url
+V 148
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/FunctionDetector.java
+END
+TclVariableRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 147
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/TclVariableRule.java
+END
+DisjunctionRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 147
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/DisjunctionRule.java
+END
+ArrowRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 141
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/ArrowRule.java
+END
+InlineCommentRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 149
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/InlineCommentRule.java
+END
+PreprocessedTclRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 151
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/PreprocessedTclRule.java
+END
+StringRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 142
+/svn/!svn/ver/20/branches/soaride_database_dev_branch/com.soartech.soar.ide.ui/src/com/soartech/soar/ide/ui/editors/text/rules/StringRule.java
+END
