@@ -1,20 +1,15 @@
 package edu.umich.soar.editor.editors.datamap.actions;
 
-import java.util.ArrayList;
-
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.TransferData;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.ui.PlatformUI;
 
-import edu.umich.soar.editor.editors.datamap.Datamap.DatamapAttribute;
-import edu.umich.soar.editor.editors.datamap.Datamap.DatamapNode;
+import edu.umich.soar.editor.editors.datamap.DatamapAttribute;
+import edu.umich.soar.editor.editors.datamap.DatamapNode;
+import edu.umich.soar.editor.editors.datamap.DatamapNode.NodeType;
 
 public class DatamapDropAdapter extends ViewerDropAdapter {
 
@@ -58,7 +53,22 @@ public class DatamapDropAdapter extends ViewerDropAdapter {
 			}
 			draggedNode.setFrom(target.to);
 		}
-		/*
+		
+		else if (operation == DND.DROP_LINK)
+		{
+			if (!childCanBeMovedToParent(draggedNode, target)) {
+				return false;
+			}
+			DatamapNode original = draggedNode.getTarget();
+			DatamapNode newParent = target.getTarget();
+			if (newParent.type != NodeType.SOAR_ID)
+			{
+				return false;
+			}
+			newParent.addLink(draggedNode.name, original);
+		}
+		
+		/*	
 		 else if (operation == DND.DROP_LINK) {
 			SoarDatabaseRow dataRow = (SoarDatabaseRow) treeItem.getData();
 			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
@@ -126,8 +136,12 @@ public class DatamapDropAdapter extends ViewerDropAdapter {
 		*/
 		if (target instanceof DatamapAttribute)
 		{
-			this.target = (DatamapAttribute) target;
-			return true;
+			DatamapAttribute attrTarget = (DatamapAttribute) target;
+			if (attrTarget.getTarget().type == NodeType.SOAR_ID)
+			{
+				this.target = attrTarget;
+				return true;
+			}
 		}
 		return false;
 	}

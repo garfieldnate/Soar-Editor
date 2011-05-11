@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
@@ -18,12 +16,11 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateCompletionProcessor;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import edu.umich.soar.editor.editors.datamap.Datamap;
-import edu.umich.soar.editor.editors.datamap.Datamap.DatamapAttribute;
-import edu.umich.soar.editor.editors.datamap.Datamap.DatamapNode;
-import edu.umich.soar.editor.editors.datamap.Datamap.NodeType;
+import edu.umich.soar.editor.editors.datamap.DatamapAttribute;
+import edu.umich.soar.editor.editors.datamap.DatamapNode;
+import edu.umich.soar.editor.editors.datamap.DatamapNode.NodeType;
 
 public class SoarCompletionProcessor extends TemplateCompletionProcessor {
 	

@@ -14,3 +14,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.ui.editors.text
 Bundle-Vendor: University of Michigan
+Bundle-ClassPath: lib/jacl.jar,
+ .,
+ lib/tcljava.jar

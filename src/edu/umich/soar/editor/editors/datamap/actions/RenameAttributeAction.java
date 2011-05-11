@@ -5,7 +5,7 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
-import edu.umich.soar.editor.editors.datamap.Datamap.DatamapAttribute;
+import edu.umich.soar.editor.editors.datamap.DatamapAttribute;
 
 public class RenameAttributeAction extends Action {
 

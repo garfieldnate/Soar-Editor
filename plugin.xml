@@ -27,5 +27,47 @@
             id="edu.umich.soar.editor.editors.datamap.DatamapEditor"
             name="Datamap Editor">
       </editor>
-   </extension>
+	</extension>
+		<extension point="org.eclipse.ui.decorators"> 
+		<decorator 
+   				id="edu.umich.soar.editor.decorators.SoarDecorator" 
+    			label="Soar Rule Decorator" 
+    			state="true" 
+    			class="edu.umich.soar.editor.decorators.SoarDecorator" 
+  				objectClass="org.eclipse.core.resources.IFile" 
+    			adaptable="true"> 
+    		<description> 
+      			Decorator for Soar source files. 
+    		</description>
+    		<enablement>
+            <and>
+            	<objectClass name="org.eclipse.core.resources.IFile"/>
+             <objectState
+                   name="extension"
+                   value="soar">
+             </objectState>
+            </and>
+         </enablement>
+  		</decorator>
+  		<decorator 
+   				id="edu.umich.soar.editor.decorators.DatamapDecorator" 
+    			label="Soar Datamap Decorator" 
+    			state="true" 
+    			class="edu.umich.soar.editor.decorators.DatamapDecorator" 
+  				objectClass="org.eclipse.core.resources.IFile" 
+    			adaptable="true"> 
+    		<description> 
+      			Decorator for Soar Datamap files. 
+    		</description>
+    		<enablement>
+            <and>
+            	<objectClass name="org.eclipse.core.resources.IFile"/>
+             <objectState
+                   name="extension"
+                   value="dm">
+             </objectState>
+            </and>
+         </enablement>
+  		</decorator> 
+</extension>
 </plugin>

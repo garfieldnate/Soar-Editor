@@ -3,6 +3,7 @@ package edu.umich.soar.editor.editors.datamap;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,180 +14,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.custom.TreeEditor;
 
-import edu.umich.soar.editor.editors.datamap.Datamap.NodeType;
+import edu.umich.soar.editor.editors.datamap.DatamapNode.NodeType;
 
 public class Datamap implements ITreeContentProvider {
 	
-	public static enum NodeType
-	{
-		SOAR_ID,
-		ENUMERATION,
-		FLOAT_RANGE,
-		INT_RANGE,
-		STRING,
-	}
-	
-	public static class DatamapNode
-	{	
-		public NodeType type;
-		public int id;
-		public Datamap datamap;
-
-		// For use only by enumerations
-		public List<String> values;
-		
-		// For use only by floats
-		public double float_min;
-		public double float_max;
-		
-		// For use only by ints
-		public int int_min;
-		public int int_max;
-		
-		public DatamapNode(NodeType type, int id, Datamap datamap)
-		{
-			this.type = type;
-			this.id = id;
-			this.datamap = datamap;	
-			if (type == NodeType.ENUMERATION)
-			{
-				values = new ArrayList<String>();
-			}
-		}
-		
-		public DatamapNode(String type, int id, Datamap datamap)
-		{
-			this(NodeType.valueOf(type), id, datamap);
-		}
-		
-		@Override
-		public String toString() {
-			if (id == 0)
-			{
-				return "state <s>";
-			}
-			return "Node, " + type + ", " + id;
-		}
-
-		public Object getSaveString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append(type.toString() + " " + id);
-			switch (type)
-			{
-			case ENUMERATION:
-				sb.append(" " + values.size());
-				for (String value : values)
-				{
-					sb.append(" " + value);
-				}
-				break;
-			case FLOAT_RANGE:
-				sb.append(" " + float_min + " " + float_max);
-				break;
-			case INT_RANGE:
-				sb.append(" " + int_min + " " + int_max);
-				break;
-			case SOAR_ID:
-				
-				break;
-			case STRING:
-				
-				break;
-			default:
-				
-				break;
-			}
-			return sb.toString();
-		}
-
-		public void addChild(String name, NodeType nodeType) {
-			DatamapNode child = new DatamapNode(nodeType, datamap.newId(), datamap);
-			DatamapAttribute attribute = new DatamapAttribute(this.id, name, child.id, datamap);
-			datamap.addNode(child);
-			datamap.addAttribute(attribute);
-			datamap.contentChanged(this);
-		}
-	}
-	
-	public static class DatamapAttribute
-	{
-		public int from;
-		public int to;
-		public String name;
-		public Datamap datamap;
-		
-		public DatamapAttribute(int from, String name, int to, Datamap datamap)
-		{
-			this.from = from;
-			this.name = name;
-			this.to = to;
-			this.datamap = datamap;
-		}
-		
-		@Override
-		public String toString() {
-			DatamapNode dest = datamap.nodes.get(to);
-			if (dest == null) return name;
-			if (dest.type == NodeType.SOAR_ID)
-			{
-				return name + " <" + dest.id + ">";
-			}
-			else if (dest.type == NodeType.ENUMERATION)
-			{
-				StringBuffer sb = new StringBuffer();
-				sb.append(name + " (");
-				for (int i = 0; i < dest.values.size(); ++i)
-				{
-					String value = dest.values.get(i);
-					sb.append(value);
-					if (i + 1 < dest.values.size())
-					{
-						sb.append(", ");
-					}
-				}
-				sb.append(")");
-				return sb.toString() + "(" + from + " to " + to + ")";
-			}
-			else if (dest.type == NodeType.INT_RANGE)
-			{
-				return name + " [" + dest.int_min + ", " + dest.int_max + "]";
-			}
-			else if (dest.type == NodeType.FLOAT_RANGE)
-			{
-				return name + " [" + dest.float_min + ", " + dest.float_max + "]";
-			}
-			return name;
-		}
-		
-		public DatamapNode getTarget()
-		{
-			return datamap.nodes.get(to);
-		}
-
-		public void setFrom(int from) {
-			datamap.removeAttribute(this);
-			this.from = from;
-			datamap.addAttribute(this);
-			datamap.contentChanged(this);
-		}
-
-		public Object getSaveString() {
-			return "" + from + " " + name + " " + to;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-			datamap.contentChanged(this);
-		}
-
-		public void delete()
-		{
-			datamap.removeAttribute(this);
-			datamap.contentChanged(this);
-		}
-	}
 	
 	public DatamapNode makeNode(String line)
 	{
@@ -218,8 +50,8 @@ public class Datamap implements ITreeContentProvider {
 		{
 			try
 			{
-				node.float_min = Double.valueOf(tokens[2]);
-				node.float_max = Double.valueOf(tokens[3]);
+				node.floatMin = Double.valueOf(tokens[2]);
+				node.floatMax = Double.valueOf(tokens[3]);
 			}
 			catch (NumberFormatException e)
 			{
@@ -236,8 +68,8 @@ public class Datamap implements ITreeContentProvider {
 		{
 			try
 			{
-				node.int_min = Integer.valueOf(tokens[2]);
-				node.int_max = Integer.valueOf(tokens[3]);
+				node.intMin = Integer.valueOf(tokens[2]);
+				node.intMax = Integer.valueOf(tokens[3]);
 			}
 			catch (NumberFormatException e)
 			{
@@ -264,18 +96,35 @@ public class Datamap implements ITreeContentProvider {
 		return ret;
 	}
 
+	// Maps node.id onto that node.
 	private Map<Integer, DatamapNode> nodes;
+	
+	// Maps attribute.from values onto a list of attributes with that .from value.
 	private Map<Integer, ArrayList<DatamapAttribute>> attributes;
-	private DatamapTreeEditor editor;
+	
+	// Maps attribute.to values onto a list of attributes with that .to value.
+	private Map<Integer, ArrayList<DatamapAttribute>> reversedAttributes;
+	private DatamapEditor editor;
 	private int maxId = -1;
 	private boolean valid = true;
+	private String filename;
+	
+	// Maps the name of a state onto root nodes for that state.
+	private Map<String, DatamapNode> stateNodeMap;
+	private List<DatamapNode> stateNodeList;
+	
 
-	private Datamap(IFile input, DatamapTreeEditor editor)
+	private Datamap(IFile input, DatamapEditor editor)
 	{
 		this.editor = editor;
 		nodes = new HashMap<Integer, DatamapNode>();
 		attributes = new HashMap<Integer, ArrayList<DatamapAttribute>>();
+		reversedAttributes = new HashMap<Integer, ArrayList<DatamapAttribute>>();
+		stateNodeMap = new HashMap<String, DatamapNode>();
+		stateNodeList = new ArrayList<DatamapNode>();
+		
 		InputStream is;
+		filename = input.getName();
 		try {
 			is = input.getContents();
 			Scanner s = new Scanner(is);
@@ -330,9 +179,56 @@ public class Datamap implements ITreeContentProvider {
 					}
 				}
 			}
+			findStates();
 		} catch (CoreException e) {
 			e.printStackTrace();
 			valid = false;
+		}
+	}
+	
+	public String[] getStateNames()
+	{
+		return stateNodeMap.keySet().toArray(new String[0]);
+	}
+	
+	public List<DatamapNode> getStateNodes()
+	{
+		return stateNodeList;
+	}
+	
+	private void findStates()
+	{
+		for (DatamapNode node : nodes.values())
+		{
+			if (node.type != NodeType.SOAR_ID) continue;
+			List<DatamapNode> typeNodes = node.getChildren("type", NodeType.ENUMERATION);
+			boolean foundTypeState = false;
+			for (DatamapNode typeNode : typeNodes)
+			{
+				if (typeNode.values.contains("state"))
+				{
+					foundTypeState = true;
+					break;
+				}
+			}
+			if (!foundTypeState)
+			{
+				continue;
+			}
+			ArrayList<String> names = new ArrayList<String>();
+			List<DatamapNode> nameNodes = node.getChildren("name", NodeType.ENUMERATION);
+			for (DatamapNode nameNode : nameNodes)
+			{
+				names.addAll(nameNode.values);
+			}
+			if (nameNodes.size() == 0) continue;
+			node.setHasState(true);
+			stateNodeList.add(node);
+			for (String name : names)
+			{
+				stateNodeMap.put(name, node);
+				node.addStateName(name);
+			}
 		}
 	}
 	
@@ -344,10 +240,15 @@ public class Datamap implements ITreeContentProvider {
 		}
 	}
 	
-	private int newId()
+	public int newId()
 	{
 		maxId += 1;
 		return maxId - 1;
+	}
+	
+	public String getFilename()
+	{
+		return filename;
 	}
 	
 	public void contentChanged(Object changed) {
@@ -357,28 +258,53 @@ public class Datamap implements ITreeContentProvider {
 		}
 	}
 	
-	private void addAttribute(DatamapAttribute attribute)
+	public void addAttribute(DatamapAttribute attribute)
 	{
 		ArrayList<DatamapAttribute> list = attributes.get(attribute.from);
 		if (list == null)
 		{
-			list = new ArrayList<Datamap.DatamapAttribute>();
+			list = new ArrayList<DatamapAttribute>();
 			attributes.put(attribute.from, list);
+		}
+		list.add(attribute);
+		list = reversedAttributes.get(attribute.to);
+		if (list == null)
+		{
+			list = new ArrayList<DatamapAttribute>();
+			reversedAttributes.put(attribute.to, list);
 		}
 		list.add(attribute);
 	}
 	
-	private void removeAttribute(DatamapAttribute attribute)
+	public void removeAttribute(DatamapAttribute attribute)
 	{
 		ArrayList<DatamapAttribute> list = attributes.get(attribute.from);
-		if (list == null)
+		if (list != null)
 		{
-			return;
+			list.remove(attribute);
 		}
-		list.remove(attribute);
+		list = reversedAttributes.get(attribute.to);
+		if (list != null)
+		{
+			list.remove(attribute);
+		}
 	}
 	
-	private void addNode(DatamapNode node)
+	public List<DatamapAttribute> getAttributesFrom(int fromId)
+	{
+		List<DatamapAttribute> ret = attributes.get(fromId);
+		if (ret != null) return ret;
+		return new ArrayList<DatamapAttribute>();
+	}
+	
+	public List<DatamapAttribute> getAttributesTo(int toId)
+	{
+		List<DatamapAttribute> ret = reversedAttributes.get(toId);
+		if (ret != null) return ret;
+		return new ArrayList<DatamapAttribute>();
+	}
+	
+	public void addNode(DatamapNode node)
 	{
 		nodes.put(node.id, node);
 	}
@@ -403,13 +329,14 @@ public class Datamap implements ITreeContentProvider {
 		if (parent instanceof DatamapNode)
 		{
 			DatamapNode node = (DatamapNode) parent;
-			return attributes.get(node.id).toArray();
+			Collection<DatamapAttribute> childAttributes = getAttributesFrom(node.id);
+			return childAttributes.toArray();
 		}
 		else if (parent instanceof DatamapAttribute)
 		{
 			DatamapAttribute attribute = (DatamapAttribute) parent;
 			DatamapNode child = nodes.get(attribute.to);
-			List<DatamapAttribute> childAttributes = attributes.get(child.id);
+			Collection<DatamapAttribute> childAttributes = getAttributesFrom(child.id);
 			if (childAttributes == null) return null;
 			return childAttributes.toArray();
 		}
@@ -418,7 +345,11 @@ public class Datamap implements ITreeContentProvider {
 
 	@Override
 	public Object[] getElements(Object parent) {
-		return new Object[] { nodes.get(0) };
+		if (parent instanceof Object[])
+		{
+			return (Object[]) parent;
+		}
+		return getChildren(parent);
 	}
 
 	@Override
@@ -428,7 +359,7 @@ public class Datamap implements ITreeContentProvider {
 
 	@Override
 	public boolean hasChildren(Object parent) {
-		return getChildren(parent) != null;
+		return getChildren(parent).length > 0;
 	}
 
 	public boolean writeToFile(IFile file, IProgressMonitor monitor) {
@@ -473,12 +404,24 @@ public class Datamap implements ITreeContentProvider {
 		return nodes;
 	}
 
-	public static Datamap read(IFile file, DatamapTreeEditor editor) {
+	public static Datamap read(IFile file, DatamapEditor editor) {
 		Datamap datamap = new Datamap(file, editor);
 		if (datamap.valid)
 		{
 			return datamap;
 		}
 		return null;
+	}
+
+	public DatamapNode getState(String stateName) {
+		return stateNodeMap.get(stateName);
+	}
+
+	public DatamapNode getStateNode(String stateName) {
+		return stateNodeMap.get(stateName);
+	}
+
+	public DatamapNode getNode(int to) {
+		return nodes.get(to);
 	}
 }
