@@ -29,53 +29,53 @@ import java.util.List;
  */
 public final class SoarProductionAst implements Serializable {
 
-	private static final long serialVersionUID = 2213831053951547710L;
-	
-	// Data Members
-	private String name = "";
-	private int startLine;
-	private int ruleOffset;
-	private String productionType = "";
-	private String comment = "";
-	private List<Condition> conditions = new ArrayList<Condition>();
+    private static final long serialVersionUID = 2213831053951547710L;
+
+    // Data Members
+    private String name = "";
+    private int startLine;
+    private int ruleOffset;
+    private String productionType = "";
+    private String comment = "";
+    private List<Condition> conditions = new ArrayList<Condition>();
     private List<Action> actions = new ArrayList<Action>();
     
-	// Constructors
-	public SoarProductionAst() {}
-		
-	// Accessors
-	public final void setName(String name) {
-		this.name = name;
-	}
-	
-	public final void setProductionType(String productionType) {
-		this.productionType = productionType;
-	}
-	
-	public final void setStartLine(int start) {
-		this.startLine = start;
-	}
-	
-	public final void addCondition(Condition c) {
+    // Constructors
+    public SoarProductionAst() {}
+
+    // Accessors
+    public final void setName(String name) {
+        this.name = name;
+    }
+
+    public final void setProductionType(String productionType) {
+        this.productionType = productionType;
+    }
+
+    public final void setStartLine(int start) {
+        this.startLine = start;
+    }
+
+    public final void addCondition(Condition c) {
         conditions.add(c);
-	}
+    }
 
     public final void addAction(Action a) {
         actions.add(a);
     }
     
-	public final int getStartLine() {
-		return startLine;
-	}
-	
-	public final String getName() {
-		return name;
-	}
-	
-	public final String getProductionType() {
-		return productionType;
-	}
-	
+    public final int getStartLine() {
+        return startLine;
+    }
+
+    public final String getName() {
+        return name;
+    }
+
+    public final String getProductionType() {
+        return productionType;
+    }
+
     /**
      * @return the actions
      */
@@ -94,7 +94,7 @@ public final class SoarProductionAst implements Serializable {
     
     public void setComment(String comment)
     {
-    	this.comment = comment;
+        this.comment = comment;
     }
 
     
@@ -107,11 +107,11 @@ public final class SoarProductionAst implements Serializable {
         return name + ":" + productionType + "\n" + conditions + "\n" + actions;
     }
 
-	public void setRuleOffset(int ruleOffset) {
-		this.ruleOffset = ruleOffset;
-	}
-	
-	public int getRuleOffset() {
-		return ruleOffset;
-	}
+    public void setRuleOffset(int ruleOffset) {
+        this.ruleOffset = ruleOffset;
+    }
+
+    public int getRuleOffset() {
+        return ruleOffset;
+    }
 }

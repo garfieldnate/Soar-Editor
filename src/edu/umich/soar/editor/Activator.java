@@ -1,10 +1,17 @@
 package edu.umich.soar.editor;
 
+import java.io.IOException;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
+import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
+import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import edu.umich.soar.editor.contexts.SoarContext;
 import edu.umich.soar.editor.icons.SoarIcons;
 
 /**
@@ -17,6 +24,13 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
+	
+    private ContributionTemplateStore templateStore;
+    private ContributionContextTypeRegistry contextRegistry;
+    
+    /** Unique key for referencing this plug-in's template store */
+    private static final String CUSTOM_TEMPLATES_KEY = "edu.umich.soar.editor.template.CustomTemplates";
+
 	
 	/**
 	 * The constructor
@@ -67,4 +81,40 @@ public class Activator extends AbstractUIPlugin {
 		super.initializeImageRegistry(registry);
 		SoarIcons.init(registry);
 	}
+	
+    /**
+     * @return the plugin's template store
+     */
+    public TemplateStore getTemplateStore()
+    {
+        if (templateStore == null)
+        {
+            templateStore = new ContributionTemplateStore(
+                    getContextTypeRegistry(), Activator.getDefault()
+                            .getPreferenceStore(), CUSTOM_TEMPLATES_KEY);
+            try
+            {
+                templateStore.load();
+            }
+            catch (IOException exception)
+            {
+                exception.printStackTrace();
+            }
+        }
+        return templateStore;
+    }
+    
+    /**
+     * @return the context type registry for this plug-in instance
+     */
+    public ContextTypeRegistry getContextTypeRegistry()
+    {
+        if (contextRegistry == null)
+        {
+            contextRegistry = new ContributionContextTypeRegistry();
+            contextRegistry.addContextType(SoarContext.CONTEXT_ID);
+        }
+        return contextRegistry;
+    }
+
 }

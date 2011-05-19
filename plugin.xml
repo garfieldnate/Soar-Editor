@@ -69,5 +69,131 @@
             </and>
          </enablement>
   		</decorator> 
-</extension>
+	</extension>
+	
+	<extension
+      point = "org.eclipse.ui.newWizards">
+	<category
+	   id="edu.umich.soar.editor.wizards.SoarCategory"
+	   name="Soar">
+	</category>
+	
+ 	<wizard
+	   id = "edu.umich.soar.editor.wizards.SoarFileWizard"
+      	   name = "Soar File"
+	   class="edu.umich.soar.editor.wizards.SoarFileWizard"
+	   category="edu.umich.soar.editor.wizards.SoarCategory"
+	   icon="icons/rule.png">
+    	   <description>New Soar File</description>
+	   <selection class="org.eclipse.core.resources.IResource"/>
+	</wizard>
+	
+	 	<wizard
+	   id = "edu.umich.soar.editor.wizards.DatamapFileWizard"
+      	   name = "Soar Datamap"
+	   class="edu.umich.soar.editor.wizards.DatamapFileWizard"
+	   category="edu.umich.soar.editor.wizards.SoarCategory"
+	   icon="icons/s_flag.png">
+    	   <description>New Soar File</description>
+	   <selection class="org.eclipse.core.resources.IResource"/>
+	</wizard>
+	
+	</extension>
+	
+	<extension
+        point="org.eclipse.ui.editors.templates">
+           
+     <contextType
+           class="edu.umich.soar.editor.contexts.SoarContext"
+           id="edu.umich.soar.editor.contexts.SoarContext"
+           name="Soar Context"/>
+     <template
+           autoinsert="true"
+           contextTypeId="edu.umich.soar.editor.contexts.SoarContext"
+           description="Compare Operator"
+           icon="icons/soar.gif"
+           id="edu.umich.soar.editor.templates.CompareOperator"
+           name="sp">
+        <pattern>
+sp {${problemspace}*compare*${operator}
+   (state &lt;s&gt; ^name ${problemspace}
+              ^operator &lt;op1&gt; +
+                        &lt;op2&gt; +)
+   (&lt;op1&gt; ^name ${operator})
+   (&lt;op2&gt; ^name)
+--&gt;
+   (&lt;s&gt; ^operator &lt;op1&gt; &gt; &lt;op2&gt;)
+}
+        </pattern>
+     </template>
+     
+     <template
+           autoinsert="true"
+           contextTypeId="edu.umich.soar.editor.contexts.SoarContext"
+           description="Apply Operator"
+           icon="icons/soar.gif"
+           id="edu.umich.soar.editor.templates.ApplyOperator"
+           name="sp">
+        <pattern>
+sp {${problemspace}*apply*${operator}
+   (state &lt;s&gt; ^operator &lt;op&gt;)
+   (&lt;op&gt; ^name ${operator})
+--&gt;
+   (&lt;s&gt;)
+}
+        </pattern>
+     </template>
+     
+     <template
+           autoinsert="true"
+           contextTypeId="edu.umich.soar.editor.contexts.SoarContext"
+           description="Elaborate Substate"
+           icon="icons/soar.gif"
+           id="edu.umich.soar.editor.templates.ElaborateSubstate"
+           name="sp">
+        <pattern>
+sp {${problemspace}*elaborate-state*substate
+   (state &lt;s&gt; ^name ${problemspace}
+              ^superstate.operator &lt;so&gt;)
+   (&lt;so&gt; ^name ${superstateoperator})
+--&gt;
+   (&lt;s&gt;)
+}
+        </pattern>
+     </template>
+     
+     <template
+           autoinsert="true"
+           contextTypeId="edu.umich.soar.editor.contexts.SoarContext"
+           description="Propose Operator"
+           icon="icons/soar.gif"
+           id="edu.umich.soar.editor.templates.ProposeOperator"
+           name="sp">
+        <pattern>
+sp {${problemspace}*propose*${operator}
+   (state &lt;s&gt; ^name ${problemspace})
+--&gt;
+   (&lt;s&gt; ^operator &lt;op&gt; + =)
+   (&lt;op&gt; ^name ${operator})
+}
+        </pattern>
+     </template>
+     
+     <template
+           autoinsert="true"
+           contextTypeId="edu.umich.soar.editor.contexts.SoarContext"
+           description="Elaborate State"
+           icon="icons/soar.gif"
+           id="edu.umich.soar.editor.templates.ElaborateState"
+           name="sp">
+        <pattern>
+sp {${problemspace}*elaborate-operator*${operator}
+   (state &lt;s&gt; ^name ${problemspace})
+--&gt;
+   (&lt;s&gt;)
+}
+        </pattern>
+     </template>
+   </extension>
+	
 </plugin>

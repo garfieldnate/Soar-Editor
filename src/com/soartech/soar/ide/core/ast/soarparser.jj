@@ -137,6 +137,8 @@ void handleDocumentationQuote(SoarProductionAst sp)
 
 /////////////////////////////////////////////////////////////
 // The LHS of the production
+//
+// Added gp-style square brackets to DisjunctionTest. -Miller 5/19/2011
 /*
 	The grammar that this recognizes
 	<ConditionSide> 			::= <Condition>+
@@ -152,6 +154,7 @@ void handleDocumentationQuote(SoarProductionAst sp)
 	<ConjunctiveTest>			::= '{' <SimpleTest>+ '}'
 	<SimpleTest>				::= <DisjunctionTest> | <RelationalTest>
 	<DisjunctionTest>			::= '<<' <Constant>+ '>>'
+                                    | '[' <Constant>+ ']'
 	<RelationalTest>            ::=	 [<Relation>] <SingleTest>
 	<Relation>					::=  '<>' | '<=>' | '<' | '<=' | '>=' | '>' | '='
 	<SingleTest>				::= <Constant> | VARIABLE
@@ -366,6 +369,11 @@ DisjunctionTest disjunctionTest() :
 	<LDISJUNCT>
 	( c = constant() { dt.add(c); })+
 	<RDISJUNCT>
+	{ return dt;}
+	|
+	<LSQBRACET>
+	( c = constant() { dt.add(c); })+
+	<RSQBRACET>
 	{ return dt;}
 }
 

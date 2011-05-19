@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: SoarEditor
-Bundle-SymbolicName: SoarEditor;singleton:=true
+Bundle-Name: Soar Editor
+Bundle-SymbolicName: edu.umich.soar.editor.SoarEditor;singleton:=true
 Bundle-Version: 0.0.0.1
 Bundle-Activator: edu.umich.soar.editor.Activator
 Require-Bundle: org.eclipse.ui,
@@ -15,5 +15,21 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.ui.editors.text
 Bundle-Vendor: University of Michigan
 Bundle-ClassPath: lib/jacl.jar,
- .,
- lib/tcljava.jar
+ lib/tcljava.jar,
+ soareditor.jar
+Export-Package: com.soartech.soar.ide.core.ast,
+ com.soartech.soar.ide.core.tcl,
+ edu.umich.soar.editor,
+ edu.umich.soar.editor.contexts,
+ edu.umich.soar.editor.decorators,
+ edu.umich.soar.editor.editors,
+ edu.umich.soar.editor.editors.datamap,
+ edu.umich.soar.editor.editors.datamap.actions,
+ edu.umich.soar.editor.editors.rules,
+ edu.umich.soar.editor.icons,
+ edu.umich.soar.editor.wizards,
+ sunlabs.brazil.util.regexp,
+ tcl.lang,
+ tcl.lang.library,
+ tcl.lang.library.java,
+ tcl.lang.reflect

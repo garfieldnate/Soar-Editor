@@ -17,6 +17,7 @@ import org.eclipse.jface.text.templates.TemplateCompletionProcessor;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.swt.graphics.Image;
 
+import edu.umich.soar.editor.Activator;
 import edu.umich.soar.editor.editors.datamap.Datamap;
 import edu.umich.soar.editor.editors.datamap.DatamapAttribute;
 import edu.umich.soar.editor.editors.datamap.DatamapNode;
@@ -282,11 +283,13 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor {
 		return null;
 	}
 
+	/*
 	@Override
 	protected Template[] getTemplates(String arg0) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	*/
 
     /*
      * (non-Javadoc)
@@ -343,10 +346,9 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor {
      *
      * @see org.eclipse.jface.text.templates.TemplateCompletionProcessor#getTemplates(java.lang.String)
      */
-    /*
+    
     @Override
     protected Template[] getTemplates( String contextTypeId ) {
-        return SoarEditorUIPlugin.getDefault().getTemplateStore().getTemplates();
+        return Activator.getDefault().getTemplateStore().getTemplates();
     }
-    */
 }
