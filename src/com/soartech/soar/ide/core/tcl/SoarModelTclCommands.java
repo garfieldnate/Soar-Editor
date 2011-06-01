@@ -160,7 +160,7 @@ public class SoarModelTclCommands implements Command
      *
      * @param interp The interpreter
      */
-    public static void installSoarCommands(RelocatableTclInterpreter interp, boolean countOnly, boolean soarCountbacks, ArrayList<String> comments)
+    public static void installSoarCommands(RelocatableTclInterpreter interp, boolean countOnly, boolean soarCountbacks, ArrayList<String> comments, boolean sourceCommands)
     {
     	SoarModelTclCommands tclCommand = new SoarModelTclCommands();
     	tclCommand.setComments(comments);
@@ -169,7 +169,22 @@ public class SoarModelTclCommands implements Command
             interp.createCommand(s, tclCommand);
         }
         interp.createCommand("winfo", WINFO_NULL_COMMAND);
-        interp.createCommand("source", new TclSourceCommand(interp, false, countOnly, comments));
+        if (sourceCommands)
+        {
+            interp.createCommand("source", new TclSourceCommand(interp, false, countOnly, comments));
+        }
+        else
+        {
+            interp.createCommand("source", new Command()
+            {
+                
+                @Override
+                public void cmdProc(Interp arg0, TclObject[] arg1) throws TclException
+                {
+                    // Dummy command: do nothing.
+                }
+            });
+        }
         TclSpCommand spCommand = new TclSpCommand(countOnly);
         interp.createCommand("sp", spCommand);
         interp.createCommand("gp", spCommand);

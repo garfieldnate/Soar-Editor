@@ -1,7 +1,12 @@
 package edu.umich.soar.editor.editors.datamap;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import org.eclipse.core.resources.IFile;
 
 public class DatamapNode
 {	
@@ -100,10 +105,25 @@ public class DatamapNode
 		stateNames.add(stateName);
 	}
 	
-	public String[] getStateNames()
-	{
-		return stateNames.toArray(new String[0]);
-	}
+    public String[] getStateNames()
+    {
+        return stateNames.toArray(new String[0]);
+    }
+    
+    public String getStateNamesString()
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < stateNames.size(); ++i)
+        {
+            String name = stateNames.get(i);
+            sb.append(name);
+            if (i + 1 < stateNames.size())
+            {
+                sb.append(", ");
+            }
+        }
+        return sb.toString();
+    }
 
 	public Object getSaveString() {
 		StringBuilder sb = new StringBuilder();
@@ -222,4 +242,58 @@ public class DatamapNode
 		}
 		return sb.toString();
 	}
+
+    public void writeProblemSpaceToFile(IFile file)
+    {
+        // Find the subset of this problem space that is pointed to by this problem space,
+        // not including <s>.superstate.
+        if (!hasState)
+        {
+            return;
+        }
+        Collection<DatamapNode> nodes = new HashSet<DatamapNode>();
+        Collection<DatamapAttribute> attributes = new HashSet<DatamapAttribute>();
+        
+        Collection<DatamapNode> currentNodes = new HashSet<DatamapNode>();
+        
+        nodes.add(this);
+        
+        for (DatamapAttribute attribute : datamap.getAttributesFrom(id))
+        {
+            DatamapNode child = datamap.getNode(attribute.to);
+            if (child.hasState())
+            {
+                continue;
+            }
+            attributes.add(attribute);
+            nodes.add(child);
+            currentNodes.add(child);
+        }
+
+        while (currentNodes.size() > 0)
+        {
+            Set<DatamapNode> childNodes = new HashSet<DatamapNode>();
+            for (DatamapNode node : currentNodes)
+            {
+                for (DatamapAttribute attribute : datamap.getAttributesFrom(node.id))
+                {
+                    if (attributes.contains(attribute))
+                    {
+                        continue;
+                    }
+                    attributes.add(attribute);
+                    DatamapNode child = datamap.getNode(attribute.to);
+                    if (nodes.contains(child))
+                    {
+                        continue;
+                    }
+                    nodes.add(child);
+                    childNodes.add(child);
+                }
+            }
+            currentNodes = childNodes;
+        }
+        
+        Datamap.writeToFile(file, nodes, attributes, null);
+    }
 }

@@ -7,6 +7,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 
 import edu.umich.soar.editor.Activator;
 
@@ -31,16 +33,23 @@ public class SoarIcons {
         try 
         {
             //get the file path to where the plugin is installed
-            URL baseIconURL = new URL(Platform.getBundle(Activator.PLUGIN_ID).getEntry("/"),"icons/");
+            Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
+            URL path = bundle.getEntry("/");
+            URL baseIconURL = new URL(path,"icons/");
             for (IconFiles file : IconFiles.values())
             {
             	String filename = file.name() + ".png";
             	ImageDescriptor desc = ImageDescriptor.createFromURL(new URL(baseIconURL, filename));
                 registry.put(filename, desc);
             }
-        } catch (MalformedURLException e) 
+        }
+        catch (MalformedURLException e) 
         {
             System.out.print("Malformed URL");
+        }
+        catch (NullPointerException e)
+        {
+            e.printStackTrace();
         }
 	}
 	

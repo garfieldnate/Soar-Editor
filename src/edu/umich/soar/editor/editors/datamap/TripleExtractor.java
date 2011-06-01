@@ -73,12 +73,16 @@ public class TripleExtractor {
 		return triplesWithValue;
 	}
 	
-	public static List<Triple> makeTriples(SoarProductionAst ast, ArrayList<String> stateVariables)
+	public static List<Triple> makeTriples(SoarProductionAst ast, ArrayList<String> stateVariables) {
+	      return makeTriples(ast, stateVariables, true);
+	}
+	
+	public static List<Triple> makeTriples(SoarProductionAst ast, ArrayList<String> stateVariables, boolean includeRhs)
 	{
 		ArrayList<Triple> triples = new ArrayList<Triple>();
 		visitingRuleNodes -= new Date().getTime();
 		
-		visitSoarProductionAst(ast, triples, stateVariables);
+		visitSoarProductionAst(ast, triples, stateVariables, includeRhs);
 		
 		visitingRuleNodes += new Date().getTime();
 		applyingState -= new Date().getTime();
@@ -138,15 +142,24 @@ public class TripleExtractor {
 		}
 	}
 
-	private static void visitSoarProductionAst(SoarProductionAst ast, ArrayList<Triple> triples, ArrayList<String> stateVariables) {
+	private static void visitSoarProductionAst(SoarProductionAst ast, ArrayList<Triple> triples, ArrayList<String> stateVariables, boolean includeRhs) {
 		debug("visitSoarProductionAst: " + ast);
 		try {
 			for (Condition condition : ast.getConditions()) {
 				visitCondition(condition, triples, stateVariables);
 			}
-			for (Action action : ast.getActions()) {
-				visitAction(action, triples);
-			}
+		    if (includeRhs)
+		    {
+		        int numTriples = triples.size();
+		        for (Action action : ast.getActions())
+		        {
+		            visitAction(action, triples);
+		        }
+		        for (int i = numTriples; i < triples.size(); ++i)
+		        {
+		            triples.get(i).rhs = true;
+		        }
+		    }
 		} catch (NullPointerException e) {
 			e.printStackTrace();
 		}
@@ -364,7 +377,7 @@ public class TripleExtractor {
 			ArrayList<Pair> values = new ArrayList<Pair>();
 			visitAttributeValueMake(avm, attributes, values);
 			
-			// TODO: debug
+			// TODO: for debugging
 			if (values.contains(null)) {
 				System.out.println("NULL");
 			}

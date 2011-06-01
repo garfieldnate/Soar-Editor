@@ -1,5 +1,6 @@
 package edu.umich.soar.editor.editors.datamap;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.umich.soar.editor.editors.datamap.DatamapNode.NodeType;
@@ -99,35 +100,65 @@ public class DatamapAttribute
 	 * @return A path from state <s> to this node.
 	 */
 	public Object getPathString() {
-		int maxLength = 20;
-		StringBuffer sb = new StringBuffer();
-		sb.append(toString());
-		DatamapAttribute current = this;
-		for (int i = 0; i < maxLength; ++i)
-		{
-			if (current.getFrom().hasState())
-			{
-				DatamapNode from = current.getFrom();
-				StringBuilder name = new StringBuilder();
-				String[] names = from.getStateNames();
-				for (int j = 0; j < names.length; ++j)
-				{
-					name.append(names[j]);
-					if (j + 1 < names.length)
-					{
-						name.append("/");
-					}
-				}
-				return name.toString() + "." + sb.toString();
-			}
-			List<DatamapAttribute> parents = datamap.getAttributesTo(current.from);
-			if (parents == null || parents.size() == 0)
-			{
-				return "..." + sb.toString();
-			}
-			current = parents.get(0);
-			sb.insert(0, current.name + ".");
-		}
-		return "..." + sb.toString();
+	    List<Object> pathList = getPathList();
+	    StringBuilder sb = new StringBuilder();
+	    for (int i = pathList.size() - 1; i >= 0; --i)
+	    {
+	        Object obj = pathList.get(i);
+	        if (obj == null)
+	        {
+	            sb.append("...");
+	        }
+	        else if (obj instanceof DatamapAttribute)
+	        {
+	            sb.append("." + ((DatamapAttribute)obj).name);
+	        }
+	        else if (obj instanceof DatamapNode)
+	        {
+	            String[] names = ((DatamapNode) obj).getStateNames();
+	            for (int j = 0; j < names.length; ++j)
+	            {
+	                sb.append(name);
+	                if (j + 1 < names.length)
+	                {
+	                    sb.append('/');
+	                }
+	            }
+	        }
+	    }
+	    return sb.toString();
+	}
+	
+	/**
+	 * 
+	 * @return A path of datamap attributes and nodes from this attribute back to a state node.
+	 *         The objects may be of type DatmapAttribute, DatamapNode (for the root &lt;s&gt; node),
+	 *         or null (if the path gets too long, this will be the last element).
+	 */
+	public List<Object> getPathList()
+	{
+	    int maxLength = 20;
+        DatamapAttribute current = this;
+        List<Object> ret = new ArrayList<Object>();
+        ret.add(this);
+        for (int i = 0; i < maxLength; ++i)
+        {
+            if (current.getFrom().hasState())
+            {
+                DatamapNode from = current.getFrom();
+                ret.add(from);
+                return ret;
+            }
+            List<DatamapAttribute> parents = datamap.getAttributesTo(current.from);
+            if (parents == null || parents.size() == 0)
+            {
+                ret.add(null);
+                return ret;
+            }
+            current = parents.get(0);
+            ret.add(current);
+        }
+        ret.add(null);
+        return ret;
 	}
 }

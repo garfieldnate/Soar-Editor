@@ -26,7 +26,9 @@ import edu.umich.soar.editor.editors.datamap.TripleExtractor;
 
 public class SoarEditor extends TextEditor {
 
-	private ColorManager colorManager;
+	public static final String ID = "edu.umich.soar.editor.editors.SoarEditor";
+	
+    private ColorManager colorManager;
 	private List<IFile> datamapFiles;
 	private List<Datamap> datamaps;
 	String folderName;

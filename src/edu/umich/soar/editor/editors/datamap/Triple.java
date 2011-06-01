@@ -47,6 +47,10 @@ public class Triple {
     // Set by GenerateDatamapFromVisualSoarFileAction.run() when reading from Visual Soar datamaps
     public String comment;
     
+    // Whether this was created from the RHS of a soar production.
+    // Set by TripleExtractor.java
+    public boolean rhs = false;
+    
 	public Triple(String variable, String attribute, String value) {
 		this.variable = variable;
 		this.attribute = attribute;
@@ -353,4 +357,5 @@ public class Triple {
 				&& this.attribute.equals(other.attribute)
 				&& this.value.equals(other.value);
 	}
+
 }

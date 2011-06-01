@@ -12,6 +12,7 @@ import edu.umich.soar.editor.editors.datamap.actions.CreateChildAction;
 import edu.umich.soar.editor.editors.datamap.actions.DeleteAttributeAction;
 import edu.umich.soar.editor.editors.datamap.actions.EditEnumValuesAction;
 import edu.umich.soar.editor.editors.datamap.actions.EditValueAction;
+import edu.umich.soar.editor.editors.datamap.actions.FindTestingRulesAction;
 import edu.umich.soar.editor.editors.datamap.actions.RenameAttributeAction;
 import edu.umich.soar.editor.editors.datamap.actions.ShowLinkedAttributesAction;
 
@@ -36,6 +37,9 @@ public class DatamapRightClickMenuListener implements IMenuListener {
 			DatamapAttribute attr = (DatamapAttribute) element;
 			manager.add(new RenameAttributeAction(attr));
 			manager.add(new DeleteAttributeAction(attr));
+			manager.add(new FindTestingRulesAction(attr, true, false));
+			manager.add(new FindTestingRulesAction(attr, false, true));
+			manager.add(new FindTestingRulesAction(attr, true, true));
 			
 			if (attr.getTarget().type == NodeType.SOAR_ID)
 			{

@@ -33,10 +33,25 @@ public class SoarRuleParser {
 	}
 
 	public static void parseRules(String text, IProgressMonitor monitor, List<SoarParseError> errors, List<SoarProductionAst> asts) {
+	    parseRules(text, monitor, errors, asts, null, true);
+	}
+	
+	public static void parseRules(String text, IProgressMonitor monitor, List<SoarParseError> errors, List<SoarProductionAst> asts, String basePath, boolean sourceCommands) {
 		RelocatableTclInterpreter interp = new RelocatableTclInterpreter();
+		if (basePath != null)
+		{
+		    try
+            {
+                interp.setWorkingDir(basePath);
+            }
+            catch (TclException e)
+            {
+                e.printStackTrace();
+            }
+		}
 		ArrayList<String> comments = new ArrayList<String>();
-		SoarModelTclCommands
-				.installSoarCommands(interp, false, false, comments);
+		SoarModelTclCommands.installSoarCommands(interp, false, false, comments, sourceCommands);
+		
 		try {
 			interp.eval(text);
 

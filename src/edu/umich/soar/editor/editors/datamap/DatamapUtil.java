@@ -252,7 +252,7 @@ public class DatamapUtil {
 		return corrections;
 	}
 
-	private static ArrayList<TerminalPath> terminalPathsForTriples(List<Triple> triples) {
+	public static ArrayList<TerminalPath> terminalPathsForTriples(List<Triple> triples) {
 		ArrayList<TerminalPath> ret = new ArrayList<TerminalPath>();
 		HashSet<String> usedVariables = new HashSet<String>();
 		
@@ -298,6 +298,9 @@ public class DatamapUtil {
 					}
 					
 					if (terminal || loops || loopsIntoPath) {
+					    // This path is a candidate for inclusion in the terminal paths,
+					    // as long as it's not too long (i.e. it collides with an existing path)
+					    // and it's not identical to an existing path.
 
 						// Make sure the path isn't too long
 						boolean tooLong = false;
@@ -316,6 +319,17 @@ public class DatamapUtil {
 						for (TerminalPath retPath : ret) {
 							if (path.equals(retPath.path)) {
 								identical = true;
+								// This path won't be included because it's equivalent to retPath.
+								// Make the productionSide of retPath include the productionSide of this path's last triple.
+								Triple pathEnd = lastTriple(path);
+								if (pathEnd.rhs)
+								{
+								    retPath.setActionSide();
+								}
+								else
+								{
+								    retPath.setConditionSide();
+								}
 								break;
 							} else if (pathsAreRedundant(path, retPath.path)) {
 								if (path.size() > retPath.path.size()) {
@@ -353,6 +367,11 @@ public class DatamapUtil {
 		}
 		
 		return ret;
+	}
+	
+	private static Triple lastTriple(List<Triple> triples)
+	{
+	    return triples.get(triples.size() - 1);
 	}
 	
 	private static boolean pathsAreRedundant(ArrayList<Triple> path, ArrayList<Triple> retPath) {
@@ -410,8 +429,16 @@ public class DatamapUtil {
 		return false;
 	}
 	
+	/**
+	 * 
+	 * @param path
+	 * @param retPath
+	 * @return If the last triple in path points to a variable that is also pointed to
+	 *         by any triple in retPath, returns that triple from retPath. Returns
+	 *         null otherwise.
+	 */
 	private static Triple pathLoopsIntoPath(ArrayList<Triple> path, ArrayList<Triple> retPath) {
-		Triple last = path.get(path.size() - 1);
+		Triple last = lastTriple(path);
 		if (!last.valueIsVariable()) return null;
 		for (int i = 0; i < retPath.size(); ++i) {
 			Triple retTriple = retPath.get(i);			

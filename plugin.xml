@@ -195,5 +195,36 @@ sp {${problemspace}*elaborate-operator*${operator}
         </pattern>
      </template>
    </extension>
-	
+   
+	<extension point="org.eclipse.ui.popupMenus"> 
+	<objectContribution 
+	      id="org.eclipse.ui.articles.action.contribution.popup.object"
+	   objectClass="org.eclipse.core.resources.IFile"
+	   nameFilter="*.dm">
+	      <action
+	         id="org.eclipse.ui.articles.action.contribution.object.action1" 
+	         label="Explode Datamap"
+	         icon="icons/s_flag.gif"
+	         menubarPath="additions" 
+	      class="edu.umich.soar.editor.actions.ExplodeDatamapAction"> 
+	      </action> 
+	   </objectContribution> 
+	</extension>
+ <extension
+       point="org.eclipse.ui.views">
+ </extension>
+ 
+  <extension
+       point="org.eclipse.ui.views">
+    <category
+          id="edu.umich.soar.editor.SoarCategory"
+          name="Soar"/>
+    <view
+          category="edu.umich.soar.editor.SoarCategory"
+          class="edu.umich.soar.editor.search.SoarSearchResultsView"
+          icon="icons/package.gif"
+          id="edu.umich.soar.editor.search.SoarSearchResultsView"
+          name="Soar Search Results"/>
+ </extension>
+ 
 </plugin>

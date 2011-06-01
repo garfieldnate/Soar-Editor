@@ -20,7 +20,7 @@ import edu.umich.soar.editor.icons.SoarIcons;
 public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "SoarEditor"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "edu.umich.soar.editor.SoarEditor"; //$NON-NLS-1$
 
 	// The shared instance
 	private static Activator plugin;
