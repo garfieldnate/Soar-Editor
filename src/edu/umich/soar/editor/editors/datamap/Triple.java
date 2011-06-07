@@ -10,6 +10,8 @@ import java.util.regex.Pattern;
 
 import com.soartech.soar.ide.core.ast.Pair;
 
+import edu.umich.soar.editor.editors.datamap.DatamapNode.NodeType;
+
 public class Triple {
 	
 	public final static String STRING_VALUE = "@string"; 
@@ -139,6 +141,23 @@ public class Triple {
 		}
 		return "string";
 	}
+
+    public NodeType getNodeType()
+    {
+        if (valueIsVariable())
+        {
+            return NodeType.SOAR_ID;
+        }
+        if (valueIsInteger())
+        {
+            return NodeType.INT_RANGE;
+        }
+        if (valueIsFloat())
+        {
+            return NodeType.FLOAT_RANGE;
+        }
+        return NodeType.STRING; 
+    }
 	
 	/**
 	 * 
@@ -357,5 +376,4 @@ public class Triple {
 				&& this.attribute.equals(other.attribute)
 				&& this.value.equals(other.value);
 	}
-
 }

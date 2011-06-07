@@ -3,13 +3,19 @@ package edu.umich.soar.editor.editors.datamap;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+
+import edu.umich.soar.editor.editors.SoarEditor;
+import edu.umich.soar.editor.editors.datamap.DatamapNode.NodeType;
+
 /**
  * Represents a single correction to be made to the existing datamap.
  * The user can choose which corrections to apply and which to ignore.
  * @author miller
  *
  */
-public class Correction {
+public class Correction implements SelectionListener {
 	
 	public DatamapNode node;
 	public ArrayList<Triple> addition;
@@ -17,9 +23,6 @@ public class Correction {
 	public Triple pathTriple;
 	public boolean anyChildren;
 	public List<Triple> pathSoFar;
-	
-	// Assigned during apply()
-	// SoarDatabaseRow tail = null;
 
 	/**
 	 * Class constructor.
@@ -28,7 +31,6 @@ public class Correction {
 	 * @param links
 	 * @param pathTriple 
 	 * @param anyChildren 
-	 * @param pathSoFar 
 	 */
 	public Correction(DatamapNode node, ArrayList<Triple> addition, ArrayList<Triple> links, Triple pathTriple, boolean anyChildren, List<Triple> pathSoFar) {
 		this.node = node;
@@ -108,6 +110,117 @@ public class Correction {
 	{
 		return anyChildren ? pathTriple.value.length() : pathTriple.attribute.length();
 	}
+
+    @Override
+    public void widgetDefaultSelected(SelectionEvent event)
+    {
+        applySolution((Integer)event.widget.getData());
+    }
+
+    @Override
+    public void widgetSelected(SelectionEvent event)
+    {
+        applySolution((Integer)event.widget.getData());
+    }
+    
+    public void applySolution(int solutionIndex)
+    {
+        System.out.println("Applying correction");
+        System.out.println("node: " + node);
+        System.out.println("addition: " + addition);
+        System.out.println("links: " + links);
+        System.out.println("pathTriple: " + pathTriple);
+        System.out.println("anyChildren: " + anyChildren);
+        System.out.println("pathSoFar: " + pathSoFar);
+        if (!anyChildren)
+        {
+            if (pathTriple.getNodeType() == NodeType.STRING)
+            {
+                if (solutionIndex == 0)
+                {
+                    node.addChild(pathTriple.attribute, NodeType.ENUMERATION);
+                }
+                else
+                {
+                    node.addChild(pathTriple.attribute, NodeType.STRING);
+                }
+            }
+            else if (pathTriple.getNodeType() == NodeType.SOAR_ID)
+            {
+                NodeType type = NodeType.values()[solutionIndex];
+                node.addChild(pathTriple.attribute, type);
+            }
+            
+            else
+            {
+                // add new child of type matching pathTriple
+                node.addChild(pathTriple.attribute, pathTriple.getNodeType());
+            }
+        }
+        else
+        {
+            // add new value to existing enum
+            NodeType childType = pathTriple.getNodeType();
+            if (childType == NodeType.STRING)
+            {
+                List<DatamapNode> enumNodes = node.getChildren(pathTriple.attribute, NodeType.ENUMERATION);
+                if (enumNodes != null && enumNodes.size() > 0)
+                {
+                    enumNodes.get(0).values.add(pathTriple.value);
+                    node.datamap.contentChanged(node);
+                }
+            }
+        }
+    }
+    
+    public int getNumSolutions()
+    {
+        if (!anyChildren && pathTriple.getNodeType() == NodeType.STRING)
+        {
+            return 2;
+        }
+        if (!anyChildren && pathTriple.getNodeType() == NodeType.SOAR_ID)
+        {
+            return NodeType.values().length;
+        }
+        return 1;
+    }
+    
+    public String getSolutionText(SoarEditor editor, int i)
+    {
+        List<Datamap> datamaps = editor.getDatamaps();
+        String folderName = editor.getFolderName();
+        StringBuffer sb = new StringBuffer();
+        sb.append("Add ");
+        if (anyChildren)
+        {
+            sb.append("value \"" + pathTriple.value + "\"");
+        }
+        else
+        {
+            if (pathTriple.getNodeType() == NodeType.STRING)
+            {
+                if (i == 0)
+                {
+                    sb.append("attribute \"" + pathTriple.attribute + "\" of type " + NodeType.ENUMERATION.getName());
+                }
+                else
+                {
+                    sb.append("attribute \"" + pathTriple.attribute + "\" of type " + NodeType.STRING.getName());
+                }
+            }
+            else if (pathTriple.getNodeType() == NodeType.SOAR_ID)
+            {
+                NodeType type = NodeType.values()[i];
+                sb.append("attribute \"" + pathTriple.attribute + "\" of type " + type.getName());
+            }
+            else
+            {
+                sb.append("attribute \"" + pathTriple.attribute + "\" of type " + pathTriple.getTypeString());
+            }
+        }
+        return sb.toString();
+    }
 
 	/**
 	 * Applys this correction to its datamap.

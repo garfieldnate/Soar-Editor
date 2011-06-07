@@ -10,6 +10,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.TreeEditor;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
@@ -145,7 +146,7 @@ public class DatamapTreeEditor extends EditorPart {
 		
 	}
 	
-	public void contentChanged(Object changed)
+	public void contentChanged(final Object changed)
 	{
 		setDirty(true);
 		Display.getDefault().asyncExec(new Runnable() {
@@ -153,13 +154,13 @@ public class DatamapTreeEditor extends EditorPart {
 			@Override
 			public void run() {
 				try {
-					TreePath[] paths = tree.getExpandedTreePaths();
+			        TreePath[] paths = tree.getExpandedTreePaths();
 					tree.refresh();
 					tree.setExpandedTreePaths(paths);
+					tree.setExpandedState(changed, true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-
 			}
 		});
 	}
@@ -173,4 +174,9 @@ public class DatamapTreeEditor extends EditorPart {
 	public void doSaveAs() {
 
 	}
+
+    public TreeViewer getTree()
+    {
+        return tree;
+    }
 }

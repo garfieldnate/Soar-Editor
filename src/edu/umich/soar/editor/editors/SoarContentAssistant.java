@@ -15,7 +15,7 @@ class SoarContentAssistant extends ContentAssistant {
         super();
         this.setContentAssistProcessor(new SoarCompletionProcessor(configuration), IDocument.DEFAULT_CONTENT_TYPE);
         this.enableAutoActivation(true);
-        this.setProposalPopupOrientation(IContentAssistant.PROPOSAL_OVERLAY);
+        this.setProposalPopupOrientation(IContentAssistant.PROPOSAL_STACKED);
         //this.setInformationControlCreator(new SoarInformationControlCreator());
     }
 }

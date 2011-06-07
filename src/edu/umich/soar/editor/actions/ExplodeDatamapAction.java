@@ -40,7 +40,7 @@ public class ExplodeDatamapAction implements IObjectActionDelegate
         {
             name = name.substring(0, dot);
         }
-        Datamap datamap = Datamap.read(file, null);
+        Datamap datamap = Datamap.read(file);
         if (datamap == null)
         {
             showErrorDialog("Bad datamap file.");

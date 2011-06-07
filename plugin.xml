@@ -227,4 +227,10 @@ sp {${problemspace}*elaborate-operator*${operator}
           name="Soar Search Results"/>
  </extension>
  
+ <extension point="org.eclipse.ui.ide.markerResolution">
+      <markerResolutionGenerator
+         markerType="org.eclipse.core.resources.problemmarker"
+         class="edu.umich.soar.editor.editors.fix.SoarFixer"/>
+ </extension>
+ 
 </plugin>
