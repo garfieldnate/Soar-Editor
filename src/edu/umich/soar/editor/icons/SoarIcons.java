@@ -24,8 +24,14 @@ public class SoarIcons {
 		LINKED_ATTRIBUTE,
 		RULE,
 		S_FLAG,
-		SAMPLE,
-		STRING,
+		STRING;
+		
+	    private static final String EXTENSION = "gif";
+
+        public String getFilename()
+        {
+            return toString().toLowerCase() + "." + EXTENSION;
+        }
 	}
 	
 	public static void init(ImageRegistry registry)
@@ -38,13 +44,15 @@ public class SoarIcons {
             URL baseIconURL = new URL(path,"icons/");
             for (IconFiles file : IconFiles.values())
             {
-            	String filename = file.name().toLowerCase() + ".png";
+            	String filename = file.getFilename();
             	URL url = new URL(baseIconURL, filename);
             	ImageDescriptor desc = ImageDescriptor.createFromURL(url);
                 registry.put(filename, desc);
                 System.out.println("filename: " + filename);
                 System.out.println("url: " + url);
                 System.out.println("desc: " + desc);
+                Image image = desc.createImage();
+                System.out.println("image: " + image);
             }
         }
         catch (MalformedURLException e) 
@@ -59,6 +67,7 @@ public class SoarIcons {
 	
     public static Image get(IconFiles file) 
     {
-        return Activator.getDefault().getImageRegistry().get(file.name() + ".png");
+        Image image = Activator.getDefault().getImageRegistry().get(file.getFilename()); 
+        return image;
     }
 }

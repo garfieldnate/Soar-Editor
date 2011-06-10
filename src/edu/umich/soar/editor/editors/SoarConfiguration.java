@@ -28,9 +28,8 @@ public class SoarConfiguration extends SourceViewerConfiguration {
 	}
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
 		return new String[] {
-			IDocument.DEFAULT_CONTENT_TYPE,
-			XMLPartitionScanner.XML_COMMENT,
-			XMLPartitionScanner.XML_TAG };
+			IDocument.DEFAULT_CONTENT_TYPE
+			};
 	}
 	
 	@Override

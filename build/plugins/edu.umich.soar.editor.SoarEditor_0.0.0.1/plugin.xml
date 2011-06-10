@@ -4,18 +4,10 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="edu.umich.soar.editor.editors.XMLEditor"
-            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
-            extensions="xxml"
-            icon="icons/sample.gif"
-            id="edu.umich.soar.editor.editors.XMLEditor"
-            name="Sample XML Editor">
-      </editor>
-      <editor
             class="edu.umich.soar.editor.editors.SoarEditor"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             extensions="soar"
-            icon="icons/sample.gif"
+            icon="icons/rule.gif"
             id="edu.umich.soar.editor.editors.SoarEditor"
             name="Soar Editor">
       </editor>
@@ -23,7 +15,7 @@
             class="edu.umich.soar.editor.editors.datamap.DatamapEditor"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             extensions="dm"
-            icon="icons/sample.gif"
+            icon="icons/a_flag.gif"
             id="edu.umich.soar.editor.editors.datamap.DatamapEditor"
             name="Datamap Editor">
       </editor>
@@ -83,7 +75,7 @@
       	   name = "Soar File"
 	   class="edu.umich.soar.editor.wizards.SoarFileWizard"
 	   category="edu.umich.soar.editor.wizards.SoarCategory"
-	   icon="icons/rule.png">
+	   icon="icons/rule.gif">
     	   <description>New Soar File</description>
 	   <selection class="org.eclipse.core.resources.IResource"/>
 	</wizard>
@@ -93,7 +85,7 @@
       	   name = "Soar Datamap"
 	   class="edu.umich.soar.editor.wizards.DatamapFileWizard"
 	   category="edu.umich.soar.editor.wizards.SoarCategory"
-	   icon="icons/s_flag.png">
+	   icon="icons/s_flag.gif">
     	   <description>New Soar File</description>
 	   <selection class="org.eclipse.core.resources.IResource"/>
 	</wizard>
