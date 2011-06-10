@@ -38,7 +38,7 @@ public class SoarIcons {
             URL baseIconURL = new URL(path,"icons/");
             for (IconFiles file : IconFiles.values())
             {
-            	String filename = file.name() + ".png";
+            	String filename = file.name().toLowerCase() + ".png";
             	ImageDescriptor desc = ImageDescriptor.createFromURL(new URL(baseIconURL, filename));
                 registry.put(filename, desc);
             }
