@@ -39,13 +39,17 @@ public class SoarIcons {
             for (IconFiles file : IconFiles.values())
             {
             	String filename = file.name().toLowerCase() + ".png";
-            	ImageDescriptor desc = ImageDescriptor.createFromURL(new URL(baseIconURL, filename));
+            	URL url = new URL(baseIconURL, filename);
+            	ImageDescriptor desc = ImageDescriptor.createFromURL(url);
                 registry.put(filename, desc);
+                System.out.println("filename: " + filename);
+                System.out.println("url: " + url);
+                System.out.println("desc: " + desc);
             }
         }
         catch (MalformedURLException e) 
         {
-            System.out.print("Malformed URL");
+            e.printStackTrace();
         }
         catch (NullPointerException e)
         {
