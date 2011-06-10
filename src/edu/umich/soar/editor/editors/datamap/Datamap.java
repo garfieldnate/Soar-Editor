@@ -43,6 +43,7 @@ public class Datamap implements ITreeContentProvider
      * @author miller
      * 
      */
+    /*
     public static class SuperstateAttribute
     {
         private DatamapNode superstateNode;
@@ -63,6 +64,7 @@ public class Datamap implements ITreeContentProvider
             return superstateNode;
         }
     }
+    */
 
     public DatamapNode makeNode(String line)
     {
@@ -125,6 +127,10 @@ public class Datamap implements ITreeContentProvider
                 e.printStackTrace();
                 valid = false;
             }
+        }
+        else if (node.type == NodeType.LINKED_DATAMAP)
+        {
+            node.relativePath = tokens[2];
         }
         return node;
     }
@@ -412,8 +418,10 @@ public class Datamap implements ITreeContentProvider
         if (parent instanceof DatamapNode)
         {
             DatamapNode node = (DatamapNode) parent;
+            
             List<Object> ret = new ArrayList<Object>();
             Collection<DatamapAttribute> childAttributes = node.datamap.getAttributesFrom(node.id);
+            /*
             if (node.hasState())
             {
                 List<Datamap> superstateDatamaps = node.datamap.findSuperstateDatamaps();
@@ -429,6 +437,7 @@ public class Datamap implements ITreeContentProvider
                     }
                 }
             }
+            */
             ret.addAll(childAttributes);
             return ret.toArray();
         }
@@ -437,6 +446,21 @@ public class Datamap implements ITreeContentProvider
             List<Object> ret = new ArrayList<Object>();
             DatamapAttribute attribute = (DatamapAttribute) parent;
             DatamapNode child = attribute.datamap.nodes.get(attribute.to);
+            
+            if (child.type == NodeType.LINKED_DATAMAP)
+            {
+                Datamap linkedDatamap = child.getLinkedDatamap();
+                if (linkedDatamap != null)
+                {
+                    List<DatamapNode> linkedStateNodes = linkedDatamap.getStateNodes();
+                    if (linkedStateNodes.size() > 0)
+                    {
+                        return staticGetChildren(linkedStateNodes.get(0));
+                    }
+                }
+            }
+            
+            /*
             if (child.hasState())
             {
                 List<Datamap> superstateDatamaps = child.datamap.findSuperstateDatamaps();
@@ -452,15 +476,18 @@ public class Datamap implements ITreeContentProvider
                     }
                 }
             }
+            */
             Collection<DatamapAttribute> childAttributes = child.datamap.getAttributesFrom(child.id);
             if (childAttributes == null) return null;
             ret.addAll(childAttributes);
             return ret.toArray();
         }
+        /*
         else if (parent instanceof SuperstateAttribute)
         {
             return staticGetChildren(((SuperstateAttribute) parent).getSuperstateNode());
         }
+        */
 
         return null;
     }

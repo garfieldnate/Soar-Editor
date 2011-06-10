@@ -10,7 +10,6 @@ ENUMERATION 6 1 state-name
 0 io 1
 0 name 6
 0 superstate 5
-0 top-state 0
 0 type 4
 1 input-link 2
 1 output-link 3

@@ -28,8 +28,10 @@ public class SoarDatamapLabelProvider extends LabelProvider implements ITableLab
 					return SoarIcons.get(IconFiles.LINKED_ATTRIBUTE);
 				}
 				return SoarIcons.get(IconFiles.ATTRIBUTE);
-			case STRING:
-				return SoarIcons.get(IconFiles.STRING);
+            case STRING:
+                return SoarIcons.get(IconFiles.STRING);
+            case LINKED_DATAMAP:
+                return SoarIcons.get(IconFiles.A_FLAG);
 			}
 		}
 		return null;

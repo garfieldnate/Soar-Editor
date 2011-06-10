@@ -1,6 +1,7 @@
 package edu.umich.soar.editor.editors.datamap;
 
 import java.awt.event.KeyEvent;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.MenuManager;
@@ -10,7 +11,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.TreeEditor;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 
@@ -26,7 +27,7 @@ import edu.umich.soar.editor.editors.datamap.actions.DatamapDragAdapter;
 import edu.umich.soar.editor.editors.datamap.actions.DatamapDropAdapter;
 import edu.umich.soar.editor.editors.datamap.actions.DeleteAttributeAction;
 
-public class DatamapTreeEditor extends EditorPart {
+public class DatamapTreeEditor extends EditorPart implements IPropertyListener {
 
 	private Composite parent;
 	private TreeViewer tree;
@@ -45,7 +46,8 @@ public class DatamapTreeEditor extends EditorPart {
 	public void init(IEditorSite site, IEditorInput input)
 			throws PartInitException {
 		setSite(site);
-		setInput(input);
+		setInputWithNotify(input);
+		addPropertyListener(this);
 		dirty = false;
 	}
 
@@ -84,13 +86,14 @@ public class DatamapTreeEditor extends EditorPart {
 		rightColumn.setWidth(200);
 		rightColumn.setResizable(true);
 		rightColumn.setText("Comments");
-			*/
+		*/
 		
         // getSite().setSelectionProvider(tree);
 
 		tree.setContentProvider(datamap);
 		tree.setLabelProvider(new SoarDatamapLabelProvider());
 		tree.setInput(new Object[] { stateNode });
+		tree.expandToLevel(2);
 		
 		tree.getControl().addKeyListener(new org.eclipse.swt.events.KeyListener() {
 			
@@ -139,7 +142,7 @@ public class DatamapTreeEditor extends EditorPart {
 		
 		tree.addDragSupport(DND.DROP_MOVE | DND.DROP_LINK, new Transfer[] {LocalSelectionTransfer.getTransfer()}, new DatamapDragAdapter());
         tree.addDropSupport(DND.DROP_MOVE | DND.DROP_LINK, new Transfer[] {LocalSelectionTransfer.getTransfer()}, new DatamapDropAdapter(tree));
-	}
+   	}
 
 	@Override
 	public void setFocus() {
@@ -148,7 +151,7 @@ public class DatamapTreeEditor extends EditorPart {
 	
 	public void contentChanged(final Object changed)
 	{
-		setDirty(true);
+	    setDirty(true);
 		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override
@@ -157,7 +160,15 @@ public class DatamapTreeEditor extends EditorPart {
 			        TreePath[] paths = tree.getExpandedTreePaths();
 					tree.refresh();
 					tree.setExpandedTreePaths(paths);
-					tree.setExpandedState(changed, true);
+			        if (changed != null && changed instanceof DatamapNode)
+			        {
+			            DatamapNode node = (DatamapNode) changed;
+			            List<DatamapAttribute> attrs = node.datamap.getAttributesTo(node.id);
+			            for (DatamapAttribute attr : attrs)
+			            {
+			                tree.setExpandedState(attr, true);
+			            }
+			        }
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -178,5 +189,14 @@ public class DatamapTreeEditor extends EditorPart {
     public TreeViewer getTree()
     {
         return tree;
+    }
+
+    @Override
+    public void propertyChanged(Object source, int propertyId)
+    {
+        if (propertyId == PROP_INPUT)
+        {
+            contentChanged(null);
+        }
     }
 }

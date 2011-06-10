@@ -52,6 +52,10 @@ public class DatamapAttribute
 		{
 			return name + " [" + dest.floatMin + ", " + dest.floatMax + "]";
 		}
+		else if (dest.type == NodeType.LINKED_DATAMAP)
+		{
+            return name + " (" + dest.relativePath + ")";
+		}
 		return name;
 	}
 	

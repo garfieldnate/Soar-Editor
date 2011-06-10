@@ -6,13 +6,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Platform;
 
 public class DatamapNode
 {
     public static enum NodeType
     {
-        SOAR_ID, ENUMERATION, FLOAT_RANGE, INT_RANGE, STRING;
+        SOAR_ID, ENUMERATION, FLOAT_RANGE, INT_RANGE, STRING, LINKED_DATAMAP;
 
         public String getName()
         {
@@ -28,6 +33,8 @@ public class DatamapNode
                 return "Identifier";
             case STRING:
                 return "String";
+            case LINKED_DATAMAP:
+                return "Linked Datamap";
             }
             return toString();
         }
@@ -60,6 +67,9 @@ public class DatamapNode
     // For use only by identifiers
     private boolean hasState = false;
     private List<String> stateNames = new ArrayList<String>();
+    
+    // For use only by linked datamaps
+    public String relativePath;
 
     public DatamapNode(NodeType type, int id, Datamap datamap)
     {
@@ -147,6 +157,9 @@ public class DatamapNode
         case STRING:
 
             break;
+        case LINKED_DATAMAP:
+            sb.append(" " + relativePath);
+            break;
         default:
 
             break;
@@ -157,6 +170,16 @@ public class DatamapNode
     public void addChild(String name, NodeType nodeType)
     {
         DatamapNode child = new DatamapNode(nodeType, datamap.newId(), datamap);
+        DatamapAttribute attribute = new DatamapAttribute(this.id, name, child.id, datamap);
+        datamap.addNode(child);
+        datamap.addAttribute(attribute);
+        datamap.contentChanged(this);
+    }
+    
+    public void addLinkedDatamapChild(String name, String relativePath)
+    {
+        DatamapNode child = new DatamapNode(NodeType.LINKED_DATAMAP, datamap.newId(), datamap);
+        child.relativePath = relativePath;
         DatamapAttribute attribute = new DatamapAttribute(this.id, name, child.id, datamap);
         datamap.addNode(child);
         datamap.addAttribute(attribute);
@@ -334,5 +357,22 @@ public class DatamapNode
         }
 
         Datamap.writeToFile(file, nodes, attributes, null);
+    }
+    
+    public Datamap getLinkedDatamap()
+    {
+        if (type != NodeType.LINKED_DATAMAP) return null;
+        if (relativePath == null) return null;
+        
+        IContainer datamapParent = datamap.getIFile().getParent();
+        IPath datamapParentPath = datamapParent.getProjectRelativePath();
+        
+        //IPath linkedDatamapPath = datamapParentPath.append("/" + relativePath);
+        IResource linkedDatamapPath = datamapParent.findMember(relativePath);
+        if (!(linkedDatamapPath instanceof IFile)) return null;
+        
+        //IFile linkedDatamapFile = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(linkedDatamapPath);
+        Datamap linkedDatamap = Datamap.read((IFile)linkedDatamapPath);
+        return linkedDatamap;
     }
 }
