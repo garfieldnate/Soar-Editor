@@ -56,4 +56,9 @@ public class RelocatableTclInterpreter extends Interp {
 		// a better choice to override.
 		return super.getCommand(arg0);
 	}
+
+	public int getErrorLine()
+    {
+        return errorLine;
+    }
 }

@@ -211,24 +211,7 @@ public class SoarEditor extends TextEditor implements DatamapSavedListener
         List<SoarParseError> errors = new ArrayList<SoarParseError>();
         List<SoarProductionAst> asts = new ArrayList<SoarProductionAst>();
         SoarRuleParser.parseRules(text, monitor, errors, asts);
-        for (SoarParseError error : errors)
-        {
-            System.out.println("ERROR, " + error.message + ", " + error.start);
-            IMarker marker;
-            try
-            {
-                marker = resource.createMarker(IMarker.PROBLEM);
-                marker.setAttribute(IMarker.CHAR_START, error.start);
-                marker.setAttribute(IMarker.CHAR_END, error.start + error.length);
-                marker.setAttribute(IMarker.MESSAGE, error.message);
-                marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
-                marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-            }
-            catch (CoreException e)
-            {
-                e.printStackTrace();
-            }
-        }
+        addErrors(resource, errors);
         ArrayList<String> stateVariables = new ArrayList<String>();
         for (SoarProductionAst ast : asts)
         {
@@ -238,6 +221,12 @@ public class SoarEditor extends TextEditor implements DatamapSavedListener
             List<Correction> corrections = null;
             boolean first = true;
             List<Datamap> datamaps = getDatamaps();
+            
+            if (stateVariables.size() == 0)
+            {
+                addError(resource, new SoarParseError("No state variables found in rule " + ast.getName(), ast.getRuleOffset(), 0));
+            }
+            
             for (Datamap datamap : datamaps)
             {
                 if (first)
@@ -261,32 +250,70 @@ public class SoarEditor extends TextEditor implements DatamapSavedListener
             }
             if (corrections != null)
             {
-                for (Correction correction : corrections)
-                {
-                    System.out.println(correction);
-                    IMarker marker;
-                    try
-                    {
-                        marker = resource.createMarker(IMarker.PROBLEM);
-                        marker.setAttribute(IMarker.CHAR_START, ast.getRuleOffset() + correction.getErrorOffset() - 1); // 1-indexed
-                                                                                                                        // to
-                                                                                                                        // 0-indexed
-                        marker.setAttribute(IMarker.CHAR_END, ast.getRuleOffset() + correction.getErrorOffset() + correction.getErrorLength() - 1);
-                        marker.setAttribute(IMarker.MESSAGE, correction.toString(datamaps, folderName));
-                        marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-                        marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
-                        addCorrection(marker, correction);
-                        correction.node.datamap.addDatamapChangedListener(this);
-                    }
-                    catch (CoreException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
+                addCorrections(resource, corrections, ast);
             }
         }
         return true;
     }
+    
+    private static void addErrors(IResource resource, List<SoarParseError> errors)
+    {
+        for (SoarParseError error : errors)
+        {
+            addError(resource, error);
+        }
+    }
+    
+    private static void addError(IResource resource, SoarParseError error)
+    {
+        System.out.println("ERROR, " + error.message + ", " + error.start);
+        IMarker marker;
+        try
+        {
+            marker = resource.createMarker(IMarker.PROBLEM);
+            marker.setAttribute(IMarker.CHAR_START, error.start);
+            marker.setAttribute(IMarker.CHAR_END, error.start + error.length);
+            marker.setAttribute(IMarker.MESSAGE, error.message);
+            marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
+            marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+        }
+        catch (CoreException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    private void addCorrections(IResource resource, List<Correction> corrections, SoarProductionAst ast)
+    {
+        for (Correction correction : corrections)
+        {
+            addCorrection(resource, correction, ast);
+        }
+    }
+    
+    private void addCorrection(IResource resource, Correction correction, SoarProductionAst ast)
+    {
+        System.out.println(correction);
+        IMarker marker;
+        try
+        {
+            marker = resource.createMarker(IMarker.PROBLEM);
+            marker.setAttribute(IMarker.CHAR_START, ast.getRuleOffset() + correction.getErrorOffset() - 1); // 1-indexed
+                                                                                                            // to
+                                                                                                            // 0-indexed
+            marker.setAttribute(IMarker.CHAR_END, ast.getRuleOffset() + correction.getErrorOffset() + correction.getErrorLength() - 1);
+            marker.setAttribute(IMarker.MESSAGE, correction.toString(datamaps, folderName));
+            marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
+            marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
+            addCorrection(marker, correction);
+            correction.node.datamap.addDatamapChangedListener(this);
+        }
+        catch (CoreException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
 
     private static String keyForMarker(IMarker marker)
     {

@@ -159,6 +159,8 @@ public class DatamapUtil {
 	 */
 	public static ArrayList<Correction> getCorrections(List<Triple> triples, Datamap datamap, List<String> stateVariables, String stateName) {
 		
+	    
+	    
 		// Paths from the rule
 		ArrayList<TerminalPath> paths = terminalPathsForTriples(triples);
 		

@@ -101,6 +101,10 @@ public class SoarAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         {
             unindentBrace(document, command);
         }
+        else if(command.length == 0 && command.text != null && command.text.equals("^"))
+        {
+            unindentNegativeAttribute(document, command);
+        }
         
         // getIndentPrefs().convertToStd(document, command);
         
@@ -209,6 +213,15 @@ public class SoarAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         return firstPart + secondPart;
     }
     
+    private void autoIndent(IDocument document, DocumentCommand command)
+    {
+        int amount = getAutoIndentAmount(document, command);
+        if (amount != -1)
+        {
+            command.text = addWhitespace(command.text, amount);
+        }
+    }
+
     /**
      * Add spaces to the given command's text to indent it as much as the
      * previous line.
@@ -216,13 +229,13 @@ public class SoarAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
      * @param document The document.
      * @param command The command.
      */
-    private void autoIndent(IDocument document, DocumentCommand command)
+    private int getAutoIndentAmount(IDocument document, DocumentCommand command)
     {
-    	//check the validity of the document
+        //check the validity of the document
         int docLength = document.getLength();
         if(command.offset == -1 || docLength == 0)
         {
-            return;
+            return -1;
         }
         
         //get the command offset
@@ -230,46 +243,43 @@ public class SoarAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         
         //get the line numbers of the current and new lines
         //NOTE: the document's line numbers are 0-based, while the displayed
-        //		line numbers in the editor are 1-based.
-    	int newLineNumber = 0;
-		try {
-			newLineNumber = document.getLineOfOffset(offset) + 1;
-		} catch (BadLocationException e) {
-			e.printStackTrace();
-		}
-    	int curLineNumber = newLineNumber - 1;
-    	
-    	String curLine = null;
+        //      line numbers in the editor are 1-based.
+        int newLineNumber = 0;
+        try {
+            newLineNumber = document.getLineOfOffset(offset) + 1;
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+        int curLineNumber = newLineNumber - 1;
+        
+        String curLine = null;
 
         // Gets the last line of Soar code (skips blanks lines and comment lines)
-        if (newLineNumber > 0)
+        if (newLineNumber <= 0) return -1;
+
+        boolean goodLine = false;
+        while ((curLineNumber > -1) && !goodLine)
         {
-            boolean goodLine = false;
-            while((curLineNumber > -1) && !goodLine)
+            try
             {
-				try {
-					int curLineStart = document.getLineOffset(curLineNumber);
-	            	curLine = document.get(curLineStart, offset - curLineStart);
-				} catch (BadLocationException e) {
-					e.printStackTrace();
-				}
-                
-                if((curLine == null) || curLine.trim().startsWith("#") || (curLine.trim().length() == 0))
-                {
-                	curLineNumber--;
-                }
-                else
-                {
-                    goodLine = true;
-                }
-            } 
+                int curLineStart = document.getLineOffset(curLineNumber);
+                curLine = document.get(curLineStart, offset - curLineStart);
+            }
+            catch (BadLocationException e)
+            {
+                e.printStackTrace();
+            }
+
+            if ((curLine == null) || curLine.trim().startsWith("#") || (curLine.trim().length() == 0))
+            {
+                curLineNumber--;
+            }
+            else
+            {
+                goodLine = true;
+            }
         }
-        else { 
-        	//no indent for 1st line
-        	//do nothing
-            return;
-        }
-    	
+
         int numSpaces = 0;
         
         String trimmed = curLine.trim();
@@ -292,16 +302,16 @@ public class SoarAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         else if((trimmed.endsWith(")")))
         {
             //align indent with matching open paren
-        	int openParenOffset = SoarPairMatcher.findMatchingOpenParen(document, offset - 1, SoarPairMatcher.parens);
-			if (openParenOffset >= 0) {
-				try {
-					int openParenLine = document.getLineOfOffset(openParenOffset);
-					int openParenLineStart = document.getLineOffset(openParenLine);
-					numSpaces = openParenOffset - openParenLineStart;
-				} catch (BadLocationException e) {
-					e.printStackTrace();
-				}
-			}
+            int openParenOffset = SoarPairMatcher.findMatchingOpenParen(document, offset - 1, SoarPairMatcher.parens);
+            if (openParenOffset >= 0) {
+                try {
+                    int openParenLine = document.getLineOfOffset(openParenOffset);
+                    int openParenLineStart = document.getLineOffset(openParenLine);
+                    numSpaces = openParenOffset - openParenLineStart;
+                } catch (BadLocationException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         else if((trimmed.startsWith("(") || trimmed.startsWith("^") || trimmed.startsWith("-^"))
                   && (trimmed.indexOf(")") == -1)
@@ -311,7 +321,117 @@ public class SoarAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
             numSpaces = curLine.indexOf("^");
         }
         
-        command.text = addWhitespace(command.text, numSpaces);
+        return numSpaces;
+    }
+    
+
+    /**
+     * Add spaces to the given command's text to indent it as much as the
+     * previous line.
+     * 
+     * @param document The document.
+     * @param command The command.
+     */
+    private String getPreviousLine(IDocument document, DocumentCommand command)
+    {
+        //check the validity of the document
+        int docLength = document.getLength();
+        if(command.offset == -1 || docLength == 0)
+        {
+            return null;
+        }
+        
+        //get the command offset
+        int offset = command.offset;
+        
+        //get the line numbers of the current and new lines
+        //NOTE: the document's line numbers are 0-based, while the displayed
+        //      line numbers in the editor are 1-based.
+        int newLineNumber = 0;
+        try {
+            newLineNumber = document.getLineOfOffset(offset) + 1;
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+        int curLineNumber = newLineNumber - 1;
+        
+        String curLine = null;
+
+        // Gets the last line of Soar code (skips blanks lines and comment lines)
+        if (newLineNumber <= 0) return null;
+
+        boolean goodLine = false;
+        int numLines = 0;
+        while ((curLineNumber > -1) && !goodLine)
+        {
+            try
+            {
+                int curLineStart = document.getLineOffset(curLineNumber);
+                curLine = document.get(curLineStart, offset - curLineStart);
+            }
+            catch (BadLocationException e)
+            {
+                e.printStackTrace();
+            }
+
+            if ((curLine == null) || curLine.trim().startsWith("#") || (curLine.trim().length() == 0) || numLines < 1)
+            {
+                curLineNumber--;
+                offset -= curLine.length();
+            }
+            else
+            {
+                goodLine = true;
+            }
+            ++numLines;
+        }
+        
+        return curLine;
+    }
+    
+    private static int getCaratOffsetForLine(String line)
+    {
+        String trimmed = line.trim();
+        int numSpaces = -1;
+        if(
+           ((trimmed.startsWith("(")) && (trimmed.endsWith(")"))) ||
+           ((trimmed.startsWith("[")) && (trimmed.endsWith("]"))) ||
+           (trimmed.startsWith(":")))
+        {
+            //align indent with previous line
+            numSpaces = getIndentAmount(line);
+            return -1;
+        }
+        else if(((trimmed.startsWith("sp")) && (trimmed.indexOf("{") != -1)) ||
+                (trimmed.startsWith("-->")))
+        {   
+            numSpaces = 3; // getIndentPrefs().getTabWidth();
+            return -1;
+        }
+        /*
+        else if((current.endsWith(")")))
+        {
+            //align indent with matching open paren
+            int openParenOffset = SoarPairMatcher.findMatchingOpenParen(document, offset - 1, SoarPairMatcher.parens);
+            if (openParenOffset >= 0) {
+                try {
+                    int openParenLine = document.getLineOfOffset(openParenOffset);
+                    int openParenLineStart = document.getLineOffset(openParenLine);
+                    numSpaces = openParenOffset - openParenLineStart;
+                } catch (BadLocationException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        */
+        else if((trimmed.startsWith("(") || trimmed.startsWith("^") || trimmed.startsWith("-^"))
+                  && (trimmed.indexOf(")") == -1)
+                  && (trimmed.indexOf("^") != -1) )
+        {
+            //align indent with the ^
+            numSpaces = line.indexOf("^");
+        }
+        return numSpaces;
     }
     
     /**
@@ -320,7 +440,7 @@ public class SoarAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
      * @param curLine The current line (preceding the indented line) of text.
      * @return the indent amount
      */
-    private int getIndentAmount(String curLine)
+    private static int getIndentAmount(String curLine)
     {
     	String trimmed = curLine.trim();
     	int indent = curLine.indexOf(trimmed.substring(0, 1));
@@ -391,6 +511,7 @@ public class SoarAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
             
             // Now modify the command so that it replaces the line with -->.
             int replacedLength = (command.offset - 2) - begin;
+            System.out.println("arrow begin: " + begin);
             command.offset = begin;
             command.length = replacedLength + 2;
             command.text = "-->";
@@ -399,6 +520,193 @@ public class SoarAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         {
         }
     }
+    
+    /**
+     * @param document
+     * @param command
+     */
+    private void unindentNegativeAttribute(IDocument document, DocumentCommand command)
+    {
+        assert command.text.length() == 1;
+        
+        if(command.offset <= 1)
+        {
+            return;
+        }
+        
+        try
+        {
+            // Check if > is preceded by one dashes
+            char dash1 = document.getChar(command.offset - 1);
+            
+            if(dash1 != '-')
+            {
+                return;
+            }
+            
+            int begin = command.offset - 2;
+            while(begin >= 0)
+            {
+                char c = document.getChar(begin);
+                if(!Character.isWhitespace(c))
+                {
+                    return;
+                }
+                if(c == '\n' || c == '\r')
+                {
+                    break;
+                }
+                --begin;
+            }
+            
+            if(begin < 0)
+            {
+                return;
+            }
+            ++begin; // skip line feed.
+            
+            String previousLine = getPreviousLine(document, command);
+            int indent = getCaratOffsetForLine(previousLine);
+            if (indent == -1) return;
+            indent -= 1;
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < indent; ++i)
+            {
+                sb.append(" ");
+            }
+            
+            // Now modify the command so that it replaces the line with -->.
+            int replacedLength = (command.offset - 2) - begin;
+            System.out.println("arrow begin: " + begin);
+            command.offset = begin;
+            command.length = replacedLength + 2;
+            command.text = sb.toString() + "-^";
+        }
+        catch (BadLocationException e)
+        {
+        }
+    }
+    
+    
+    
+    /**
+     * @param document
+     * @param command
+     */
+    /*
+    private void unindentNegativeAttribute(IDocument document, DocumentCommand command)
+    {
+        assert command.text.length() == 1;
+        
+        if(command.offset <= 1)
+        {
+            return;
+        }
+        
+      //check the validity of the document
+        int docLength = document.getLength();
+        if(command.offset == -1 || docLength == 0)
+        {
+            return;
+        }
+        
+        //get the command offset
+        int offset = command.offset;
+        
+        //get the line numbers of the current and new lines
+        //NOTE: the document's line numbers are 0-based, while the displayed
+        //      line numbers in the editor are 1-based.
+        int newLineNumber = 0;
+        try {
+            newLineNumber = document.getLineOfOffset(offset) + 1;
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+            return;
+        }
+        int prevLineNumber = newLineNumber - 2;
+        
+        int thisLineNumber = newLineNumber - 1;
+        int thisLineStart;
+        try
+        {
+            thisLineStart = document.getLineOffset(thisLineNumber);
+            String thisLine = document.get(thisLineStart, offset - thisLineStart);
+            offset -= thisLine.length();
+        }
+        catch (BadLocationException e)
+        {
+            e.printStackTrace();
+            return;
+        }
+        
+        String previousLine = null;
+
+        // Gets the last line of Soar code (skips blanks lines and comment lines)
+        if (newLineNumber <= 0) return;
+
+        boolean goodLine = false;
+        while ((prevLineNumber > -1) && !goodLine)
+        {
+            try
+            {
+                int curLineStart = document.getLineOffset(prevLineNumber);
+                previousLine = document.get(curLineStart, offset - curLineStart);
+            }
+            catch (BadLocationException e)
+            {
+                e.printStackTrace();
+            }
+
+            if ((previousLine == null) || previousLine.trim().startsWith("#") || (previousLine.trim().length() == 0))
+            {
+                prevLineNumber--;
+            }
+            else
+            {
+                goodLine = true;
+            }
+        }
+        
+        try
+        {
+            // Check if ^ is preceded by -
+            char dash = document.getChar(command.offset - 1);
+            
+            if(dash != '-')
+            {
+                return;
+            }
+            
+            int begin = command.offset - 2;
+            while(begin >= 0)
+            {
+                char c = document.getChar(begin);
+                if(!Character.isWhitespace(c))
+                {
+                    return;
+                }
+                if(c == '\n' || c == '\r')
+                {
+                    break;
+                }
+                --begin;
+            }
+            ++begin; // skip line feed
+            
+            int indentAmount = getOffsetForLine(previousLine);
+
+            if (indentAmount == -1) return;
+            System.out.println("arrow begin: " + begin);
+            //command.offset = thisLineStart + indentAmount - 1;
+            command.offset = begin;
+            command.length = 2;
+            command.text = "-^";
+        }
+        catch (BadLocationException e)
+        {
+        }
+    }
+    */
     
     /**
      * @param document
