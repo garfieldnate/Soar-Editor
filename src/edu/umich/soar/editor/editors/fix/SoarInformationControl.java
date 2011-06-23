@@ -52,14 +52,17 @@ public class SoarInformationControl extends AbstractInformationControl implement
             String text = (marker.getAttribute(IMarker.MESSAGE, (String) null));
             label.setText(text);
             Correction correction = editor.findCorrection(marker);
-            for (int i = 0; i < correction.getNumSolutions(); ++i)
+            if (correction != null)
             {
-                Link link = new Link(parent, SWT.NONE);
-                link.setText("<a>" + correction.getSolutionText(editor, i) + "</a>");
-                link.setBackground(parent.getBackground());
-                link.setForeground(parent.getForeground());
-                link.addSelectionListener(correction);
-                link.setData(new Integer(i));
+                for (int i = 0; i < correction.getNumSolutions(); ++i)
+                {
+                    Link link = new Link(parent, SWT.NONE);
+                    link.setText("<a>" + correction.getSolutionText(editor, i) + "</a>");
+                    link.setBackground(parent.getBackground());
+                    link.setForeground(parent.getForeground());
+                    link.addSelectionListener(correction);
+                    link.setData(new Integer(i));
+                }
             }
         }
     }

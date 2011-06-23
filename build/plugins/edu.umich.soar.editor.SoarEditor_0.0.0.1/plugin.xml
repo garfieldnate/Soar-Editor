@@ -19,6 +19,7 @@
             id="edu.umich.soar.editor.editors.datamap.DatamapEditor"
             name="Datamap Editor">
       </editor>
+<!--
 	</extension>
 		<extension point="org.eclipse.ui.decorators"> 
 		<decorator 
@@ -62,6 +63,7 @@
          </enablement>
   		</decorator> 
 	</extension>
+	-->
 	
 	<extension
       point = "org.eclipse.ui.newWizards">
