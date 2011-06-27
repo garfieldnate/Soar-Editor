@@ -12,50 +12,39 @@ import org.osgi.framework.BundleException;
 
 import edu.umich.soar.editor.Activator;
 
-public class SoarIcons {
-	
-	public static enum IconFiles
-	{
-		A_FLAG,
-		ATTRIBUTE,
-		ENUMERATION,
-		FLOAT,
-		INTEGER,
-		LINKED_ATTRIBUTE,
-		RULE,
-		S_FLAG,
-		STRING;
-		
-	    private static final String EXTENSION = "gif";
+public class SoarIcons
+{
+
+    public static enum IconFiles
+    {
+        A_FLAG, ATTRIBUTE, ENUMERATION, FLOAT, INTEGER, LINKED_ATTRIBUTE, RULE, S_FLAG, STRING;
+
+        private static final String EXTENSION = "gif";
 
         public String getFilename()
         {
             return toString().toLowerCase() + "." + EXTENSION;
         }
-	}
-	
-	public static void init(ImageRegistry registry)
-	{
-        try 
+    }
+
+    public static void init(ImageRegistry registry)
+    {
+        try
         {
-            //get the file path to where the plugin is installed
+            // get the file path to where the plugin is installed
             Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
             URL path = bundle.getEntry("/");
-            URL baseIconURL = new URL(path,"icons/");
+            URL baseIconURL = new URL(path, "icons/");
             for (IconFiles file : IconFiles.values())
             {
-            	String filename = file.getFilename();
-            	URL url = new URL(baseIconURL, filename);
-            	ImageDescriptor desc = ImageDescriptor.createFromURL(url);
+                String filename = file.getFilename();
+                URL url = new URL(baseIconURL, filename);
+                ImageDescriptor desc = ImageDescriptor.createFromURL(url);
                 registry.put(filename, desc);
-                System.out.println("filename: " + filename);
-                System.out.println("url: " + url);
-                System.out.println("desc: " + desc);
                 Image image = desc.createImage();
-                System.out.println("image: " + image);
             }
         }
-        catch (MalformedURLException e) 
+        catch (MalformedURLException e)
         {
             e.printStackTrace();
         }
@@ -63,11 +52,11 @@ public class SoarIcons {
         {
             e.printStackTrace();
         }
-	}
-	
-    public static Image get(IconFiles file) 
+    }
+
+    public static Image get(IconFiles file)
     {
-        Image image = Activator.getDefault().getImageRegistry().get(file.getFilename()); 
+        Image image = Activator.getDefault().getImageRegistry().get(file.getFilename());
         return image;
     }
 }

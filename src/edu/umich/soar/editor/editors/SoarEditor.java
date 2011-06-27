@@ -13,11 +13,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.DocumentProviderRegistry;
@@ -28,13 +25,12 @@ import com.soartech.soar.ide.core.ast.SoarProductionAst;
 import edu.umich.soar.editor.editors.SoarRuleParser.SoarParseError;
 import edu.umich.soar.editor.editors.datamap.Correction;
 import edu.umich.soar.editor.editors.datamap.Datamap;
-import edu.umich.soar.editor.editors.datamap.Datamap.DatamapSavedListener;
-import edu.umich.soar.editor.editors.datamap.DatamapEditor;
+import edu.umich.soar.editor.editors.datamap.Datamap.DatamapChangedListener;
 import edu.umich.soar.editor.editors.datamap.DatamapUtil;
 import edu.umich.soar.editor.editors.datamap.Triple;
 import edu.umich.soar.editor.editors.datamap.TripleExtractor;
 
-public class SoarEditor extends TextEditor implements DatamapSavedListener
+public class SoarEditor extends TextEditor implements DatamapChangedListener
 {
 
     public static final String ID = "edu.umich.soar.editor.editors.SoarEditor";
@@ -89,7 +85,8 @@ public class SoarEditor extends TextEditor implements DatamapSavedListener
                 continue;
             }
 
-            Datamap datamap = null;
+            // Datamap datamap = null;
+            /*
             IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
             IEditorPart part = page.findEditor(new FileEditorInput(file));
             if (part != null && part instanceof DatamapEditor)
@@ -97,15 +94,17 @@ public class SoarEditor extends TextEditor implements DatamapSavedListener
                 DatamapEditor editor = (DatamapEditor) part;
                 datamap = editor.getDatamap();
             }
+            */
 
-            if (datamap == null)
-            {
-                datamap = Datamap.read(file);
-            }
+            //if (datamap == null)
+            //{
+            Datamap datamap = Datamap.read(file);
+            //}
             if (datamap != null)
             {
                 datamaps.add(datamap);
                 datamap.addDatamapChangedListener(this);
+                
             }
         }
     }
@@ -347,7 +346,7 @@ public class SoarEditor extends TextEditor implements DatamapSavedListener
     }
 
     @Override
-    public boolean onDatamapSaved(Datamap datamap)
+    public boolean onDatamapChanged(Datamap datamap, Object changed)
     {
         FileEditorInput fileInput = (FileEditorInput) getEditorInput();
         IFile file = fileInput.getFile();

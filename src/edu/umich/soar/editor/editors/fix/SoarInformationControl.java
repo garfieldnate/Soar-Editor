@@ -49,7 +49,7 @@ public class SoarInformationControl extends AbstractInformationControl implement
         {
             MarkerAnnotation annotation = (MarkerAnnotation) input;
             IMarker marker = annotation.getMarker();
-            String text = (marker.getAttribute(IMarker.MESSAGE, (String) null));
+            String text = (marker.getAttribute(IMarker.MESSAGE, ""));
             label.setText(text);
             Correction correction = editor.findCorrection(marker);
             if (correction != null)

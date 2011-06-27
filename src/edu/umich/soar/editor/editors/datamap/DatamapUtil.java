@@ -175,11 +175,14 @@ public class DatamapUtil {
 			
 			// Add initial state triples.
 			//currentNodes.add(root);
+			/*
 			DatamapNode stateNode = datamap.getStateNode(stateName);
 			if (stateNode != null)
 			{
 				currentNodes.add(stateNode);
 			}
+			*/
+			currentNodes.addAll(datamap.getStateNodes());
 			
 			// Walk down the path, keeping track of which datamap nodes
 			// correspond to the current location on the path.

@@ -49,7 +49,7 @@ public class ExplodeDatamapAction implements IObjectActionDelegate
         for (String stateName : datamap.getStateNames())
         {
             DatamapNode stateNode = datamap.getStateNode(stateName);
-            String newFilename = name + "_" + stateName + ".dm";
+            String newFilename = /* name + "_" + */ stateName + ".dm";
             IPath newPath = new Path(parent.toOSString() + File.separator + newFilename);
             IFile newFile = ResourcesPlugin.getWorkspace().getRoot().getFile(newPath);
             if (newFile.exists())

@@ -25,17 +25,23 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import edu.umich.soar.editor.editors.datamap.DatamapNode.NodeType;
 
 public class Datamap implements ITreeContentProvider
 {
-    
+
     public static interface DatamapSavedListener
     {
         boolean onDatamapSaved(Datamap datamap);
     }
+
+    public static interface DatamapChangedListener
+    {
+        boolean onDatamapChanged(Datamap datamap, Object changed);
+    }
+
+    private static Map<IFile, Datamap> filesToDatamaps = new HashMap<IFile, Datamap>();
 
     /**
      * For use by the datmap editor
@@ -44,27 +50,18 @@ public class Datamap implements ITreeContentProvider
      * 
      */
     /*
-    public static class SuperstateAttribute
-    {
-        private DatamapNode superstateNode;
-
-        public SuperstateAttribute(DatamapNode superstateNode)
-        {
-            this.superstateNode = superstateNode;
-        }
-
-        @Override
-        public String toString()
-        {
-            return "superstate (" + superstateNode.datamap.filename + ": " + superstateNode.getStateNamesString() + ")";
-        }
-
-        public DatamapNode getSuperstateNode()
-        {
-            return superstateNode;
-        }
-    }
-    */
+     * public static class SuperstateAttribute { private DatamapNode
+     * superstateNode;
+     * 
+     * public SuperstateAttribute(DatamapNode superstateNode) {
+     * this.superstateNode = superstateNode; }
+     * 
+     * @Override public String toString() { return "superstate (" +
+     * superstateNode.datamap.filename + ": " +
+     * superstateNode.getStateNamesString() + ")"; }
+     * 
+     * public DatamapNode getSuperstateNode() { return superstateNode; } }
+     */
 
     public DatamapNode makeNode(String line)
     {
@@ -163,9 +160,10 @@ public class Datamap implements ITreeContentProvider
     // Maps the name of a state onto root nodes for that state.
     private Map<String, DatamapNode> stateNodeMap;
     private List<DatamapNode> stateNodeList;
-    
+
     // Event listeners
     private Set<DatamapSavedListener> datamapSavedListeners;
+    private Set<DatamapChangedListener> datamapChangedListeners;
 
     private Datamap(IFile input)
     {
@@ -175,6 +173,7 @@ public class Datamap implements ITreeContentProvider
         stateNodeMap = new HashMap<String, DatamapNode>();
         stateNodeList = new ArrayList<DatamapNode>();
         datamapSavedListeners = new HashSet<Datamap.DatamapSavedListener>();
+        datamapChangedListeners = new HashSet<Datamap.DatamapChangedListener>();
 
         InputStream is;
         filename = input.getName();
@@ -320,29 +319,51 @@ public class Datamap implements ITreeContentProvider
 
     public void contentChanged(Object changed)
     {
-        IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-        IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(input.getName());
-        try
+        contentChanged(changed, false);
+    }
+
+    public void contentChanged(Object changed, boolean closing)
+    {
+        if (!closing)
         {
-            IEditorPart part = page.openEditor(new FileEditorInput(input), desc.getId());
-            if (part instanceof DatamapEditor)
+            IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+            IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(input.getName());
+            try
             {
-                DatamapEditor editor = (DatamapEditor) part;
-                editor.setDatamap(this);
-                editor.contentChanged(changed);
+                FileEditorInput fileEditorInput = new FileEditorInput(input);
+                IEditorPart part = page.findEditor(fileEditorInput);
+                if (part == null)
+                {
+                    part = page.openEditor(fileEditorInput, desc.getId());
+                    /*
+                    if (part instanceof DatamapEditor)
+                    {
+                        DatamapEditor editor = (DatamapEditor) part;
+                        editor.setDatamap(this);
+                    }
+                    */
+                }
+            }
+            catch (PartInitException e)
+            {
+                e.printStackTrace();
             }
         }
-        catch (PartInitException e)
+
+        // Notify listeners
+        List<DatamapChangedListener> toRemove = new ArrayList<Datamap.DatamapChangedListener>();
+        for (DatamapChangedListener listener : datamapChangedListeners)
         {
-            e.printStackTrace();
+            if (!listener.onDatamapChanged(this, changed))
+            {
+                toRemove.add(listener);
+            }
         }
+        datamapSavedListeners.removeAll(toRemove);
 
         /*
-        if (editor != null)
-        {
-            editor.contentChanged(changed);
-        }
-        */
+         * if (editor != null) { editor.contentChanged(changed); }
+         */
     }
 
     public void addAttribute(DatamapAttribute attribute)
@@ -418,26 +439,17 @@ public class Datamap implements ITreeContentProvider
         if (parent instanceof DatamapNode)
         {
             DatamapNode node = (DatamapNode) parent;
-            
+
             List<Object> ret = new ArrayList<Object>();
             Collection<DatamapAttribute> childAttributes = node.datamap.getAttributesFrom(node.id);
             /*
-            if (node.hasState())
-            {
-                List<Datamap> superstateDatamaps = node.datamap.findSuperstateDatamaps();
-                if (superstateDatamaps != null)
-                {
-                    for (Datamap datamap : superstateDatamaps)
-                    {
-                        List<DatamapNode> stateNodes = datamap.getStateNodes();
-                        if (stateNodes.size() == 1)
-                        {
-                            ret.add(new SuperstateAttribute(stateNodes.get(0)));
-                        }
-                    }
-                }
-            }
-            */
+             * if (node.hasState()) { List<Datamap> superstateDatamaps =
+             * node.datamap.findSuperstateDatamaps(); if (superstateDatamaps !=
+             * null) { for (Datamap datamap : superstateDatamaps) {
+             * List<DatamapNode> stateNodes = datamap.getStateNodes(); if
+             * (stateNodes.size() == 1) { ret.add(new
+             * SuperstateAttribute(stateNodes.get(0))); } } } }
+             */
             ret.addAll(childAttributes);
             return ret.toArray();
         }
@@ -446,7 +458,7 @@ public class Datamap implements ITreeContentProvider
             List<Object> ret = new ArrayList<Object>();
             DatamapAttribute attribute = (DatamapAttribute) parent;
             DatamapNode child = attribute.datamap.nodes.get(attribute.to);
-            
+
             if (child.type == NodeType.LINKED_DATAMAP)
             {
                 Datamap linkedDatamap = child.getLinkedDatamap();
@@ -459,35 +471,25 @@ public class Datamap implements ITreeContentProvider
                     }
                 }
             }
-            
+
             /*
-            if (child.hasState())
-            {
-                List<Datamap> superstateDatamaps = child.datamap.findSuperstateDatamaps();
-                if (superstateDatamaps != null)
-                {
-                    for (Datamap datamap : superstateDatamaps)
-                    {
-                        List<DatamapNode> stateNodes = datamap.getStateNodes();
-                        if (stateNodes.size() == 1)
-                        {
-                            ret.add(new SuperstateAttribute(stateNodes.get(0)));
-                        }
-                    }
-                }
-            }
-            */
+             * if (child.hasState()) { List<Datamap> superstateDatamaps =
+             * child.datamap.findSuperstateDatamaps(); if (superstateDatamaps !=
+             * null) { for (Datamap datamap : superstateDatamaps) {
+             * List<DatamapNode> stateNodes = datamap.getStateNodes(); if
+             * (stateNodes.size() == 1) { ret.add(new
+             * SuperstateAttribute(stateNodes.get(0))); } } } }
+             */
             Collection<DatamapAttribute> childAttributes = child.datamap.getAttributesFrom(child.id);
             if (childAttributes == null) return null;
             ret.addAll(childAttributes);
             return ret.toArray();
         }
         /*
-        else if (parent instanceof SuperstateAttribute)
-        {
-            return staticGetChildren(((SuperstateAttribute) parent).getSuperstateNode());
-        }
-        */
+         * else if (parent instanceof SuperstateAttribute) { return
+         * staticGetChildren(((SuperstateAttribute)
+         * parent).getSuperstateNode()); }
+         */
 
         return null;
     }
@@ -527,13 +529,13 @@ public class Datamap implements ITreeContentProvider
         {
             attribtuesCollection.addAll(attributeList);
         }
-        
+
         if (!writeToFile(file, nodes.values(), attribtuesCollection, monitor))
         {
             return false;
         }
-        
-        List<DatamapSavedListener> toRemove = new ArrayList<Datamap.DatamapSavedListener>(); 
+
+        List<DatamapSavedListener> toRemove = new ArrayList<Datamap.DatamapSavedListener>();
         for (DatamapSavedListener listener : datamapSavedListeners)
         {
             if (!listener.onDatamapSaved(this))
@@ -595,11 +597,21 @@ public class Datamap implements ITreeContentProvider
 
     public static Datamap read(IFile file)
     {
+        System.out.println("Datamap.read, file: " + file);
+        if (filesToDatamaps.containsKey(file))
+        {
+            Datamap datamap = filesToDatamaps.get(file);
+            System.out.println("Found datamap in map, returning: " + datamap);
+            return datamap;
+        }
         Datamap datamap = new Datamap(file);
         if (datamap.valid)
         {
+            filesToDatamaps.put(file, datamap);
+            System.out.println("Added datamap to map, returning: " + datamap);
             return datamap;
         }
+        System.out.println("Problem reading datama, returning null.");
         return null;
     }
 
@@ -659,7 +671,7 @@ public class Datamap implements ITreeContentProvider
         }
         return datamapFiles;
     }
-    
+
     public List<Datamap> findSuperstateDatamaps()
     {
         List<IFile> superstateDatamapFiles = findSuperstateDatamapFiles();
@@ -676,9 +688,33 @@ public class Datamap implements ITreeContentProvider
         return ret;
     }
 
-    public void addDatamapChangedListener(DatamapSavedListener listener)
+    public void addDatamapSavedListener(DatamapSavedListener listener)
     {
-        datamapSavedListeners.add(listener);
+        if (!datamapSavedListeners.contains(listener))
+        {
+            datamapSavedListeners.add(listener);
+        }
+    }
+
+    public void addDatamapChangedListener(DatamapChangedListener listener)
+    {
+        if (!datamapChangedListeners.contains(listener))
+        {
+            datamapChangedListeners.add(listener);
+        }
+    }
+
+    public static void datamapClosed(Datamap datamap)
+    {
+        System.out.println("Datamap.datamapClosed, datamap: " + datamap);
+        IFile file = datamap.input;
+        System.out.println("Input is: " + file);
+        if (filesToDatamaps.containsKey(file))
+        {
+            System.out.println("...Removing datmap from map");
+            filesToDatamaps.remove(file);
+        }
+        datamap.contentChanged(null, true);
     }
 
 }

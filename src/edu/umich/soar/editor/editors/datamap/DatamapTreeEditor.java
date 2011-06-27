@@ -13,13 +13,17 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPropertyListener;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 
@@ -27,7 +31,7 @@ import edu.umich.soar.editor.editors.datamap.actions.DatamapDragAdapter;
 import edu.umich.soar.editor.editors.datamap.actions.DatamapDropAdapter;
 import edu.umich.soar.editor.editors.datamap.actions.DeleteAttributeAction;
 
-public class DatamapTreeEditor extends EditorPart implements IPropertyListener {
+public class DatamapTreeEditor extends EditorPart implements IPropertyListener, DisposeListener {
 
 	private Composite parent;
 	private TreeViewer tree;
@@ -142,6 +146,8 @@ public class DatamapTreeEditor extends EditorPart implements IPropertyListener {
 		
 		tree.addDragSupport(DND.DROP_MOVE | DND.DROP_LINK, new Transfer[] {LocalSelectionTransfer.getTransfer()}, new DatamapDragAdapter());
         tree.addDropSupport(DND.DROP_MOVE | DND.DROP_LINK, new Transfer[] {LocalSelectionTransfer.getTransfer()}, new DatamapDropAdapter(tree));
+        
+        parent.addDisposeListener(this);
    	}
 
 	@Override
@@ -199,4 +205,12 @@ public class DatamapTreeEditor extends EditorPart implements IPropertyListener {
             contentChanged(null);
         }
     }
+
+    @Override
+    public void widgetDisposed(DisposeEvent e)
+    {
+        System.out.println("widgetdisposed: " + this);
+        Datamap.datamapClosed(datamap);
+    }
+
 }
