@@ -6,6 +6,7 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IInformationControlExtension2;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -15,13 +16,13 @@ import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 import edu.umich.soar.editor.editors.SoarEditor;
 import edu.umich.soar.editor.editors.datamap.Correction;
+import edu.umich.soar.editor.editors.datamap.Datamap;
 
 public class SoarInformationControl extends AbstractInformationControl implements IInformationControlExtension2
 {
 
     private SoarEditor editor;
     private Object input;
-    private Label label;
     private Composite parent;
 
     public SoarInformationControl(SoarEditor editor, Shell shell)
@@ -40,21 +41,33 @@ public class SoarInformationControl extends AbstractInformationControl implement
     @Override
     public void setInput(Object input)
     {
+        //getShell().setSize(600, 300);
         this.input = input;
+        int numLines = 3;
+        int lineWidth = 10;
         if (input instanceof String)
         {
+            Label label = new Label(parent, SWT.NONE);
+            label.setBackground(parent.getBackground());
+            label.setForeground(parent.getForeground());
+            String text = (String) input;
             label.setText((String) input);
+            lineWidth = text.length();
         }
         else if (input instanceof MarkerAnnotation)
         {
             MarkerAnnotation annotation = (MarkerAnnotation) input;
             IMarker marker = annotation.getMarker();
             String text = (marker.getAttribute(IMarker.MESSAGE, ""));
+            Label label = new Label(parent, SWT.NONE);
+            label.setBackground(parent.getBackground());
+            label.setForeground(parent.getForeground());
             label.setText(text);
             Correction correction = editor.findCorrection(marker);
             if (correction != null)
             {
-                for (int i = 0; i < correction.getNumSolutions(); ++i)
+                int numSolutions = correction.getNumSolutions();
+                for (int i = 0; i < numSolutions; ++i)
                 {
                     Link link = new Link(parent, SWT.NONE);
                     link.setText("<a>" + correction.getSolutionText(editor, i) + "</a>");
@@ -63,24 +76,34 @@ public class SoarInformationControl extends AbstractInformationControl implement
                     link.addSelectionListener(correction);
                     link.setData(new Integer(i));
                 }
+                Datamap datamap = correction.node.datamap;
+                String datamapName = datamap.getFilename();
+                Link link = new Link(parent, SWT.NONE);
+                link.setText("<a>Open datamap \"" + datamapName + "\"</a>");
+                link.setBackground(parent.getBackground());
+                link.setForeground(parent.getForeground());
+                link.addSelectionListener(correction);
+                link.setData(new Integer(-1));
+                numLines += (numSolutions + 1) * 2;
             }
+            lineWidth = text.length();
         }
+        Point constraint = computeSizeConstraints(lineWidth, numLines);
+        setSizeConstraints(constraint.x, constraint.y);
+        getShell().setMinimumSize(constraint.x, constraint.y);
     }
 
     @Override
     protected void createContent(Composite parent)
     {
+        System.out.println("creating content");
         this.parent = parent;
-        parent.setLayout(new GridLayout(1, false));
-        setBackgroundColor(parent.getBackground());
-        setForegroundColor(parent.getForeground());
-        label = new Label(parent, SWT.NONE);
-        label.setBackground(parent.getBackground());
-        label.setForeground(parent.getForeground());
-
+        this.parent.setLayout(new GridLayout(1, false));
+        setBackgroundColor(this.parent.getBackground());
+        setForegroundColor(this.parent.getForeground());
         // new Button(parent, 0);
     }
-
+    
     @Override
     public IInformationControlCreator getInformationPresenterControlCreator()
     {
@@ -90,8 +113,10 @@ public class SoarInformationControl extends AbstractInformationControl implement
             @Override
             public IInformationControl createInformationControl(Shell shell)
             {
-                return new SoarInformationControl(editor, shell);
+                SoarInformationControl ret = new SoarInformationControl(editor, shell);
+                return ret;
             }
         };
     }
+    
 }

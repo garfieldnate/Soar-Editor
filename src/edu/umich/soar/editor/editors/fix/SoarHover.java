@@ -93,7 +93,8 @@ public class SoarHover implements IAnnotationHover, IAnnotationHoverExtension, I
     @Override
     public IInformationControl createInformationControl(Shell shell)
     {
-        return new SoarInformationControl(editor, shell);
+        SoarInformationControl ret = new SoarInformationControl(editor, shell);
+        return ret;
     }
 
     @Override

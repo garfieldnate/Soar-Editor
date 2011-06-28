@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.ui.IFileEditorInput;
 
 import tcl.lang.RelocatableTclInterpreter;
 import tcl.lang.TclException;
@@ -33,11 +34,6 @@ public class SoarRuleParser
             this.start = start;
             this.length = length;
         }
-    }
-
-    public static void parseRules(String text, IProgressMonitor monitor, List<SoarParseError> errors, List<SoarProductionAst> asts)
-    {
-        parseRules(text, monitor, errors, asts, null, true);
     }
 
     public static void parseRules(String text, IProgressMonitor monitor, List<SoarParseError> errors, List<SoarProductionAst> asts, String basePath,

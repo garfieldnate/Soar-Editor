@@ -10,10 +10,12 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.part.FileEditorInput;
@@ -204,12 +206,19 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
         {
             return false;
         }
+        if (!(editorInput instanceof IFileEditorInput))
+        {
+            return false;
+        }
+        IFileEditorInput fileEditorInput = (IFileEditorInput) editorInput;
         IDocument doc = docProvider.getDocument(editorInput);
         if (doc == null) return false;
         String text = doc.get();
+        IContainer parentContainer = fileEditorInput.getFile().getParent();
+        String basePath = parentContainer.getLocation().toOSString();
         List<SoarParseError> errors = new ArrayList<SoarParseError>();
         List<SoarProductionAst> asts = new ArrayList<SoarProductionAst>();
-        SoarRuleParser.parseRules(text, monitor, errors, asts);
+        SoarRuleParser.parseRules(text, monitor, errors, asts, basePath, true);
         addErrors(resource, errors);
         ArrayList<String> stateVariables = new ArrayList<String>();
         for (SoarProductionAst ast : asts)

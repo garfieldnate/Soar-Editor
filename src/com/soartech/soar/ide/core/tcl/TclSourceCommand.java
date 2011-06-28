@@ -70,7 +70,7 @@ public class TclSourceCommand implements Command
      */
     public void cmdProc(Interp interp, TclObject[] args) throws TclException
     {
-    	/*
+    	
         assert interp == this.interp;
         
         if(args.length != 2)
@@ -100,11 +100,17 @@ public class TclSourceCommand implements Command
         File externalFile = path.toFile();
         if(externalFile.exists()) {
         	//interp.evalFile(fileName);
+            /*
         	if (countOnly) {
         		//SoarDatabaseUtil.countRulesFromFile(externalFile, this.interp);
         	} else {
         		SoarDatabaseUtil.importRules(externalFile, this.interp, comments);
         	}
+        	*/
+        }
+        else
+        {
+            throw new TclException(interp, "File not found: " + fileName);
         }
         // In the event of an exception, the stack will not be popped so that
         // it is possible to recover the name of the file being processed when
@@ -114,6 +120,6 @@ public class TclSourceCommand implements Command
         {
             this.interp.eval("popd");
         }
-        */
+        
     }
 }

@@ -60,7 +60,14 @@ public class SoarSearchResultsView extends ViewPart implements IDoubleClickListe
             {
                 view = (SoarSearchResultsView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ID);
             }
-            view.setSearchResults(results);
+            if (view == null)
+            {
+                view = (SoarSearchResultsView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ID);
+            }
+            if (view != null)
+            {
+                view.setSearchResults(results);
+            }
         }
         catch (PartInitException e)
         {

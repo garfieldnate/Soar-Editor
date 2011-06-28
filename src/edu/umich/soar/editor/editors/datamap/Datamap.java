@@ -27,6 +27,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
 import edu.umich.soar.editor.editors.datamap.DatamapNode.NodeType;
+import edu.umich.soar.editor.search.SoarSearchResultsView;
 
 public class Datamap implements ITreeContentProvider
 {
@@ -336,12 +337,9 @@ public class Datamap implements ITreeContentProvider
                 {
                     part = page.openEditor(fileEditorInput, desc.getId());
                     /*
-                    if (part instanceof DatamapEditor)
-                    {
-                        DatamapEditor editor = (DatamapEditor) part;
-                        editor.setDatamap(this);
-                    }
-                    */
+                     * if (part instanceof DatamapEditor) { DatamapEditor editor
+                     * = (DatamapEditor) part; editor.setDatamap(this); }
+                     */
                 }
             }
             catch (PartInitException e)
@@ -715,6 +713,37 @@ public class Datamap implements ITreeContentProvider
             filesToDatamaps.remove(file);
         }
         datamap.contentChanged(null, true);
+    }
+    
+    public DatamapEditor openInEditor()
+    {
+        return openInEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage());
+    }
+
+    public DatamapEditor openInEditor(IWorkbenchPage page)
+    {
+        DatamapEditor view = null;
+        String ID = DatamapEditor.ID;
+
+        try
+        {
+            FileEditorInput editorInput = new FileEditorInput(input);
+            view = (DatamapEditor) page.findEditor(editorInput);
+            if (view == null)
+            {
+                view = (DatamapEditor) page.openEditor(editorInput, ID);
+            }
+            else
+            {
+                page.activate(view);
+            }
+            return view;
+        }
+        catch (PartInitException e)
+        {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

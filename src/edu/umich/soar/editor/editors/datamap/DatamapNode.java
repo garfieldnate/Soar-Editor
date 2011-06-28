@@ -67,7 +67,7 @@ public class DatamapNode
     // For use only by identifiers
     private boolean hasState = false;
     private List<String> stateNames = new ArrayList<String>();
-    
+
     // For use only by linked datamaps
     public String relativePath;
 
@@ -167,23 +167,29 @@ public class DatamapNode
         return sb.toString();
     }
 
-    public void addChild(String name, NodeType nodeType)
+    public DatamapNode addChild(String name, NodeType nodeType)
     {
+        // Don't add a child to a non-id node.
+        if (type != NodeType.SOAR_ID) return null;
         DatamapNode child = new DatamapNode(nodeType, datamap.newId(), datamap);
         DatamapAttribute attribute = new DatamapAttribute(this.id, name, child.id, datamap);
         datamap.addNode(child);
         datamap.addAttribute(attribute);
         datamap.contentChanged(this);
+        return child;
     }
-    
-    public void addLinkedDatamapChild(String name, String relativePath)
+
+    public DatamapNode addLinkedDatamapChild(String name, String relativePath)
     {
+        // Don't add a child to a non-id node.
+        if (type != NodeType.SOAR_ID) return null;
         DatamapNode child = new DatamapNode(NodeType.LINKED_DATAMAP, datamap.newId(), datamap);
         child.relativePath = relativePath;
         DatamapAttribute attribute = new DatamapAttribute(this.id, name, child.id, datamap);
         datamap.addNode(child);
         datamap.addAttribute(attribute);
         datamap.contentChanged(this);
+        return child;
     }
 
     public void addLink(String name, DatamapNode child)
@@ -218,18 +224,12 @@ public class DatamapNode
                 }
             }
         }
-        if (hasState && name.equals("superstate"))
-        {
-            List<Datamap> superstates = datamap.findSuperstateDatamaps();
-            if (superstates != null)
-            {
-                for (Datamap ss : superstates)
-                {
-                    List<DatamapNode> ssNodes = ss.getStateNodes();
-                    children.addAll(ssNodes);
-                }
-            }
-        }
+        /*
+         * if (hasState && name.equals("superstate")) { List<Datamap>
+         * superstates = datamap.findSuperstateDatamaps(); if (superstates !=
+         * null) { for (Datamap ss : superstates) { List<DatamapNode> ssNodes =
+         * ss.getStateNodes(); children.addAll(ssNodes); } } }
+         */
         return children;
     }
 
@@ -247,18 +247,13 @@ public class DatamapNode
                 }
             }
         }
-        if (hasState && name.equals("superstate") && type == NodeType.SOAR_ID)
-        {
-            List<Datamap> superstates = datamap.findSuperstateDatamaps();
-            if (superstates != null)
-            {
-                for (Datamap ss : superstates)
-                {
-                    List<DatamapNode> ssNodes = ss.getStateNodes();
-                    children.addAll(ssNodes);
-                }
-            }
-        }
+        /*
+         * if (hasState && name.equals("superstate") && type ==
+         * NodeType.SOAR_ID) { List<Datamap> superstates =
+         * datamap.findSuperstateDatamaps(); if (superstates != null) { for
+         * (Datamap ss : superstates) { List<DatamapNode> ssNodes =
+         * ss.getStateNodes(); children.addAll(ssNodes); } } }
+         */
 
         return children;
     }
@@ -274,18 +269,12 @@ public class DatamapNode
                 children.add(child);
             }
         }
-        if (hasState && type == NodeType.SOAR_ID)
-        {
-            List<Datamap> superstates = datamap.findSuperstateDatamaps();
-            if (superstates != null)
-            {
-                for (Datamap ss : superstates)
-                {
-                    List<DatamapNode> ssNodes = ss.getStateNodes();
-                    children.addAll(ssNodes);
-                }
-            }
-        }
+        /*
+         * if (hasState && type == NodeType.SOAR_ID) { List<Datamap> superstates
+         * = datamap.findSuperstateDatamaps(); if (superstates != null) { for
+         * (Datamap ss : superstates) { List<DatamapNode> ssNodes =
+         * ss.getStateNodes(); children.addAll(ssNodes); } } }
+         */
 
         return children;
     }
@@ -358,21 +347,23 @@ public class DatamapNode
 
         Datamap.writeToFile(file, nodes, attributes, null);
     }
-    
+
     public Datamap getLinkedDatamap()
     {
         if (type != NodeType.LINKED_DATAMAP) return null;
         if (relativePath == null) return null;
-        
+
         IContainer datamapParent = datamap.getIFile().getParent();
         IPath datamapParentPath = datamapParent.getProjectRelativePath();
-        
-        //IPath linkedDatamapPath = datamapParentPath.append("/" + relativePath);
+
+        // IPath linkedDatamapPath = datamapParentPath.append("/" +
+        // relativePath);
         IResource linkedDatamapPath = datamapParent.findMember(relativePath);
         if (!(linkedDatamapPath instanceof IFile)) return null;
-        
-        //IFile linkedDatamapFile = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(linkedDatamapPath);
-        Datamap linkedDatamap = Datamap.read((IFile)linkedDatamapPath);
+
+        // IFile linkedDatamapFile =
+        // ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(linkedDatamapPath);
+        Datamap linkedDatamap = Datamap.read((IFile) linkedDatamapPath);
         return linkedDatamap;
     }
 }

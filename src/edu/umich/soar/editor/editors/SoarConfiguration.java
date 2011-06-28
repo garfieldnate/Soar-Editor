@@ -40,12 +40,14 @@ public class SoarConfiguration extends SourceViewerConfiguration {
 	
 	@Override
 	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
-	    return new SoarHover(editor, sourceViewer);
+	    SoarHover ret = new SoarHover(editor, sourceViewer);
+	    return ret;
 	}
 	
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
-		return new SoarHover(editor, sourceViewer);
+        SoarHover ret = new SoarHover(editor, sourceViewer);
+        return ret;
 	}
 	
 	

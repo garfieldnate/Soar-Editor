@@ -22,6 +22,7 @@ import edu.umich.soar.editor.editors.datamap.Datamap.DatamapChangedListener;
 
 public class DatamapEditor extends MultiPageEditorPart implements DatamapChangedListener
 {
+    public static final String ID = "edu.umich.soar.editor.editors.datamap.DatamapEditor";
 
     List<DatamapTreeEditor> treeEditors;
     List<TreePath[]> treePaths;
