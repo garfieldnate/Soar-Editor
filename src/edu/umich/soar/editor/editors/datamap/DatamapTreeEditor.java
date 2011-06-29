@@ -21,9 +21,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPropertyListener;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 
@@ -140,7 +138,7 @@ public class DatamapTreeEditor extends EditorPart implements IPropertyListener, 
 		*/
 
 		MenuManager manager = new MenuManager();
-		manager.addMenuListener(new DatamapRightClickMenuListener(tree));
+		manager.addMenuListener(new DatamapRightClickMenuListener(tree, datamap));
 		Menu menu = manager.createContextMenu(tree.getTree());
 		tree.getTree().setMenu(menu);
 		
@@ -157,7 +155,10 @@ public class DatamapTreeEditor extends EditorPart implements IPropertyListener, 
 	
 	public void contentChanged(final Object changed)
 	{
-	    setDirty(true);
+	    if (changed != null)
+	    {
+	        setDirty(true);
+	    }
 		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override

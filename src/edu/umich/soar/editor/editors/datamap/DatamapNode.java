@@ -13,7 +13,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 
-public class DatamapNode
+import edu.umich.soar.editor.editors.datamap.Datamap.DatamapChangedListener;
+
+public class DatamapNode implements DatamapChangedListener
 {
     public static enum NodeType
     {
@@ -169,6 +171,18 @@ public class DatamapNode
 
     public DatamapNode addChild(String name, NodeType nodeType)
     {
+        if (type == NodeType.LINKED_DATAMAP)
+        {
+            Datamap linked = getLinkedDatamap();
+            if (linked != null)
+            {
+                List<DatamapNode> stateNodes = linked.getStateNodes();
+                if (!stateNodes.isEmpty())
+                {
+                    return stateNodes.get(0).addChild(name, nodeType);
+                }
+            }
+        }
         // Don't add a child to a non-id node.
         if (type != NodeType.SOAR_ID) return null;
         DatamapNode child = new DatamapNode(nodeType, datamap.newId(), datamap);
@@ -181,6 +195,18 @@ public class DatamapNode
 
     public DatamapNode addLinkedDatamapChild(String name, String relativePath)
     {
+        if (type == NodeType.LINKED_DATAMAP)
+        {
+            Datamap linked = getLinkedDatamap();
+            if (linked != null)
+            {
+                List<DatamapNode> stateNodes = linked.getStateNodes();
+                if (!stateNodes.isEmpty())
+                {
+                    return stateNodes.get(0).addLinkedDatamapChild(name, relativePath);
+                }
+            }
+        }
         // Don't add a child to a non-id node.
         if (type != NodeType.SOAR_ID) return null;
         DatamapNode child = new DatamapNode(NodeType.LINKED_DATAMAP, datamap.newId(), datamap);
@@ -201,6 +227,21 @@ public class DatamapNode
 
     public List<DatamapNode> getChildren()
     {
+        if (this.type == NodeType.LINKED_DATAMAP)
+        {
+            Datamap datamap = getLinkedDatamap();
+            if (datamap != null)
+            {
+                List<DatamapNode> stateNodes = datamap.getStateNodes();
+                List<DatamapNode> ret = new ArrayList<DatamapNode>();
+                for (DatamapNode stateNode : stateNodes)
+                {
+                    ret.addAll(stateNode.getChildren());
+                }
+                return ret;
+            }
+        }
+
         List<DatamapNode> children = new ArrayList<DatamapNode>();
         for (DatamapAttribute attribute : datamap.getAttributesFrom(id))
         {
@@ -212,6 +253,21 @@ public class DatamapNode
 
     public List<DatamapNode> getChildren(String name)
     {
+        if (this.type == NodeType.LINKED_DATAMAP)
+        {
+            Datamap datamap = getLinkedDatamap();
+            if (datamap != null)
+            {
+                List<DatamapNode> ret = new ArrayList<DatamapNode>();
+                List<DatamapNode> stateNodes = datamap.getStateNodes();
+                for (DatamapNode stateNode : stateNodes)
+                {
+                    ret.addAll(stateNode.getChildren(name));
+                }
+                return ret;
+            }
+        }
+
         List<DatamapNode> children = new ArrayList<DatamapNode>();
         for (DatamapAttribute attribute : datamap.getAttributesFrom(id))
         {
@@ -235,6 +291,21 @@ public class DatamapNode
 
     public List<DatamapNode> getChildren(String name, NodeType type)
     {
+        if (this.type == NodeType.LINKED_DATAMAP)
+        {
+            Datamap datamap = getLinkedDatamap();
+            if (datamap != null)
+            {
+                List<DatamapNode> ret = new ArrayList<DatamapNode>();
+                List<DatamapNode> stateNodes = datamap.getStateNodes();
+                for (DatamapNode stateNode : stateNodes)
+                {
+                    ret.addAll(stateNode.getChildren(name, type));
+                }
+                return ret;
+            }
+        }
+
         List<DatamapNode> children = new ArrayList<DatamapNode>();
         for (DatamapAttribute attribute : datamap.getAttributesFrom(id))
         {
@@ -247,37 +318,19 @@ public class DatamapNode
                 }
             }
         }
-        /*
-         * if (hasState && name.equals("superstate") && type ==
-         * NodeType.SOAR_ID) { List<Datamap> superstates =
-         * datamap.findSuperstateDatamaps(); if (superstates != null) { for
-         * (Datamap ss : superstates) { List<DatamapNode> ssNodes =
-         * ss.getStateNodes(); children.addAll(ssNodes); } } }
-         */
 
         return children;
     }
 
-    public List<DatamapNode> getChildren(NodeType type)
-    {
-        List<DatamapNode> children = new ArrayList<DatamapNode>();
-        for (DatamapAttribute attribute : datamap.getAttributesFrom(id))
-        {
-            DatamapNode child = datamap.getNode(attribute.to);
-            if (child != null && child.type == type)
-            {
-                children.add(child);
-            }
-        }
-        /*
-         * if (hasState && type == NodeType.SOAR_ID) { List<Datamap> superstates
-         * = datamap.findSuperstateDatamaps(); if (superstates != null) { for
-         * (Datamap ss : superstates) { List<DatamapNode> ssNodes =
-         * ss.getStateNodes(); children.addAll(ssNodes); } } }
-         */
-
-        return children;
-    }
+    /*
+     * public List<DatamapNode> getChildren(NodeType type) { List<DatamapNode>
+     * children = new ArrayList<DatamapNode>(); for (DatamapAttribute attribute
+     * : datamap.getAttributesFrom(id)) { DatamapNode child =
+     * datamap.getNode(attribute.to); if (child != null && child.type == type) {
+     * children.add(child); } }
+     * 
+     * return children; }
+     */
 
     public String tabName()
     {
@@ -365,5 +418,30 @@ public class DatamapNode
         // ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(linkedDatamapPath);
         Datamap linkedDatamap = Datamap.read((IFile) linkedDatamapPath);
         return linkedDatamap;
+    }
+
+    /**
+     * 
+     * @return If this is a linked datamap node, return the linked datamap.
+     *         Otherwise, return this node's datamap.
+     */
+    public Datamap getDatamap()
+    {
+        if (type == NodeType.LINKED_DATAMAP)
+        {
+            Datamap ret = getLinkedDatamap();
+            if (ret != null) return ret;
+        }
+        return datamap;
+    }
+
+    @Override
+    public boolean onDatamapChanged(Datamap datamap, Object changed)
+    {
+        if (datamap != this.datamap)
+        {
+            this.datamap.contentChanged(null);
+        }
+        return true;
     }
 }

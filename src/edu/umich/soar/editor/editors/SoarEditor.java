@@ -315,6 +315,8 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
             marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
             addCorrection(marker, correction);
             correction.node.datamap.addDatamapChangedListener(this);
+            Datamap linkedDatamap = correction.node.getLinkedDatamap();
+            if (linkedDatamap != null) linkedDatamap.addDatamapChangedListener(this);
         }
         catch (CoreException e)
         {

@@ -2,6 +2,9 @@ package edu.umich.soar.editor;
 
 import java.io.IOException;
 
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
@@ -45,6 +48,11 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		/*
+		IResourceChangeListener listener = new SoarResourceChangeListener();
+		int mask = IResourceChangeEvent.POST_CHANGE;
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(listener, mask);
+		*/
 	}
 
 	/*

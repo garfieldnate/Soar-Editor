@@ -4,6 +4,7 @@ package edu.umich.soar.editor.editors.datamap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import com.soartech.soar.ide.core.ast.Action;
@@ -18,6 +19,7 @@ import com.soartech.soar.ide.core.ast.DisjunctionTest;
 import com.soartech.soar.ide.core.ast.FunctionCall;
 import com.soartech.soar.ide.core.ast.Pair;
 import com.soartech.soar.ide.core.ast.PositiveCondition;
+import com.soartech.soar.ide.core.ast.PreferenceSpecifier;
 import com.soartech.soar.ide.core.ast.RHSValue;
 import com.soartech.soar.ide.core.ast.SimpleTest;
 import com.soartech.soar.ide.core.ast.SingleTest;
@@ -391,8 +393,37 @@ public class TripleExtractor {
 
 	private static void visitAttributeValueMake(AttributeValueMake avm, ArrayList<Pair> attributes, ArrayList<Pair> values) {
 		debug("visitAttributeValueMake: " + avm);
+		
+		// Hack to deal with numeric indifferent preferences
+		boolean wasEquals = false;
+		
 		for (ValueMake vm : avm.getValueMakes()) {
+		    RHSValue rhsValue = vm.getRHSValue();
+		    if (rhsValue.isConstant())
+		    {
+		        String stringValue = rhsValue.getPair().getString();
+		        boolean isNumber = stringValue.matches("(\\d+)|(\\d*\\.\\d+)");
+		        if (isNumber && wasEquals)
+		        {
+		            wasEquals = false;
+		            continue;
+		        }
+		    }
 			visitValueMake(vm, values);
+			wasEquals = false;
+		    if (rhsValue.isVariable())
+            {
+		        Iterator<PreferenceSpecifier> it = vm.getPreferenceSpecifiers();
+		        while(it.hasNext())
+		        {
+		            PreferenceSpecifier ps = it.next();
+		            // Let's be lenient here to avoid unnecessary flags in edge cases
+		            if (ps.isUnaryPreference() /* && ps.getPreferenceSpecifierType() == PreferenceSpecifier.EQUAL */ )
+		            {
+		                wasEquals = true;
+		            }
+		        }
+            }
 		}
 		for (RHSValue rv : avm.getRHSValues()) {
 			if (rv.isVariable()) {
@@ -405,7 +436,16 @@ public class TripleExtractor {
 
 	private static void visitRHSValue(RHSValue rv, ArrayList<Pair> names) {
 		debug("visitRHSValue");
-		names.add(rv.getPair());
+		Pair pair = rv.getPair();
+		if (rv.isFunctionCall())
+		{
+		    pair = new Pair("<__FUNCTION__" + pair.getString() + ">", pair.getOffset(), pair.getEndOffset());
+		}
+		else if (rv.isConstant())
+		{
+	        debug("visitRHSValue");
+		}
+		names.add(pair);
 	}
 
 	private static void visitValueMake(ValueMake vm, ArrayList<Pair> values) {

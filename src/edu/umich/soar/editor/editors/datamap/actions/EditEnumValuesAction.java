@@ -74,7 +74,7 @@ public class EditEnumValuesAction extends Action {
 					node.values.add(line);
 				}
 			}
-			node.datamap.contentChanged(node);
+            node.datamap.contentChanged(node);
 		}
 	}
 }

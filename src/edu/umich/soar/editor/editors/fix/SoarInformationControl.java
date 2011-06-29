@@ -76,7 +76,7 @@ public class SoarInformationControl extends AbstractInformationControl implement
                     link.addSelectionListener(correction);
                     link.setData(new Integer(i));
                 }
-                Datamap datamap = correction.node.datamap;
+                Datamap datamap = correction.node.getDatamap();
                 String datamapName = datamap.getFilename();
                 Link link = new Link(parent, SWT.NONE);
                 link.setText("<a>Open datamap \"" + datamapName + "\"</a>");

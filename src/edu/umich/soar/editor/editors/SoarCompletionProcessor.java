@@ -76,14 +76,18 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
 
         String currentWord = cursorText.substring(lastWhitespace);
         String lastRealWord = cursorText.substring(lastRealWhitespace);
-        String secondLastRealWorld = cursorText.substring(secondLastRealWhitespace, lastRealWhitespace - 1);
+        String secondLastRealWord = (lastRealWhitespace - 1 >= secondLastRealWhitespace ? cursorText.substring(secondLastRealWhitespace, lastRealWhitespace - 1) : "");
+        String secondLastWord = trimNonChars(secondLastRealWord);
         char lastChar = cursorText.length() > 0 ? cursorText.charAt(cursorText.length() - 1) : ' ';
 
         // determine paren depth
         int parenDepth = 0;
+        int braceDepth = 0;
+        int lastBrace = 0;
         char[] cursorChars = cursorText.toCharArray();
-        for (char c : cursorChars)
+        for (int i = 0; i < cursorChars.length; ++i)
         {
+            char c = cursorChars[i];
             if (c == '(')
             {
                 ++parenDepth;
@@ -92,8 +96,22 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
             {
                 --parenDepth;
             }
+            if (c == '{')
+            {
+                ++braceDepth;
+                if (braceDepth == 1)
+                {
+                    lastBrace = i;
+                }
+            }
+            else if (c == '}')
+            {
+                --braceDepth;
+            }
         }
 
+        String thisRuleText = allText.substring(lastBrace);
+        
         /*
          * if (cursorText.trim().length() == 0) { String ruleName =
          * row.getName().toLowerCase().replace(' ', '-'); String proposal =
@@ -105,7 +123,7 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
         HashSet<String> proposals = new HashSet<String>();
         if (parenDepth > 0)
         {
-            if (lastRealWord.startsWith("^"))
+            if (lastRealWord.startsWith("^") || lastRealWord.startsWith("-^"))
             {
                 Collection<String> found = findDatamapAttributes(lastRealWord);
                 if (found.isEmpty()) found = findDatamapAttributes();
@@ -113,11 +131,23 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
             }
             else if (lastChar != '(')
             {
-                Collection<String> found = findDatamapValues(secondLastRealWorld);
+                Collection<String> found = findDatamapValues(secondLastRealWord);
                 if (found.size() == 0) found = findDatamapValues();
                 proposals.addAll(found);
             }
             if (lastChar != '^' && lastChar != '.')
+            {
+                proposals.addAll(findVariables(thisRuleText));
+            }
+            if (proposals.size() == 0)
+            {
+                proposals.addAll(findAttributes(thisRuleText));
+                if (lastChar == '(')
+                {
+                    proposals.add("state <s>");
+                }
+            }
+            if (proposals.size() == 0)
             {
                 proposals.addAll(findVariables(allText));
             }
@@ -125,6 +155,14 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
             {
                 proposals.addAll(findAttributes(allText));
             }
+        }
+        else if (braceDepth == 0) 
+        {
+            proposals.add("sp {");
+        }
+        else
+        {
+            proposals.add("(");
         }
         ArrayList<String> proposalsList = new ArrayList<String>(proposals);
         Collections.sort(proposalsList, new Comparator<String>() {
@@ -167,6 +205,33 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
             return ret;
         }
         return thisRet;
+    }
+    
+    private static String trimNonChars(String word)
+    {
+        if (word.isEmpty())
+        {
+            return word;
+        }
+        int start;
+        for(start = 0; start < word.length(); ++start)
+        {
+            char c = word.charAt(start);
+            if (Character.isLetter(c))
+            {
+                break;
+            }
+        }
+        int end;
+        for (end = word.length(); end >= start; --end)
+        {
+            char c = word.charAt(end - 1);
+            if (Character.isLetter(c))
+            {
+                break;
+            }
+        }
+        return word.substring(start, end);
     }
 
     public static class ProposalInfo implements Comparable<ProposalInfo>
@@ -297,7 +362,6 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
 
     private Collection<String> findDatamapValues(String secondLastWord)
     {
-
         String last = null;
 
         if (secondLastWord != null)

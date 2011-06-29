@@ -44,6 +44,13 @@ public class Correction implements SelectionListener
         this.pathTriple = pathTriple;
         this.anyChildren = anyChildren;
         this.pathSoFar = pathSoFar;
+        
+        // Handle special case where pathTriple's value is variable
+        // and node is not of type SOAR_ID
+        if (node.type != NodeType.SOAR_ID && pathTriple.valueIsVariable())
+        {
+            
+        }
     }
 
     public String toString(List<Datamap> datamaps, String folderName)
@@ -75,7 +82,7 @@ public class Correction implements SelectionListener
         {
             sb.append(" " + datamaps.get(0).getFilename());
         }
-        sb.append(", problem space \"" + folderName + "\"");
+        // sb.append(", problem space \"" + folderName + "\"");
 
         sb.append("\n<s>");
         for (int i = 0; i < pathSoFar.size(); ++i)
@@ -87,15 +94,6 @@ public class Correction implements SelectionListener
         sb.append("." + pathTriple.attribute + " " + pathTriple.value);
 
         return sb.toString();
-        /*
-         * StringBuffer buff = new StringBuffer(); buff.append(node.toString());
-         * for (Triple triple : addition) { buff.append("." + triple.attribute);
-         * } Triple last = addition.get(addition.size() - 1); if
-         * (last.valueIsConstant()) { buff.append(" " + last.value); } if (links
-         * != null && links.size() > 0) { buff.append(", link with:"); for
-         * (Triple triple : links) { buff.append(" " + triple); } } return
-         * buff.toString();
-         */
     }
 
     public int getErrorOffset()
@@ -144,7 +142,7 @@ public class Correction implements SelectionListener
         if (solutionIndex == -1)
         {
             // Open corresponding datamap
-            node.datamap.openInEditor();
+            node.getDatamap().openInEditor();
             return;
         }
         if (!anyChildren)
@@ -156,7 +154,10 @@ public class Correction implements SelectionListener
                     DatamapNode child = node.addChild(pathTriple.attribute, NodeType.ENUMERATION);
 
                     // Also add enumeration value
-                    child.values.add(pathTriple.value);
+                    if (child != null)
+                    {
+                        child.values.add(pathTriple.value);
+                    }
                 }
                 else
                 {
@@ -185,7 +186,7 @@ public class Correction implements SelectionListener
                 if (enumNodes != null && enumNodes.size() > 0)
                 {
                     enumNodes.get(0).values.add(pathTriple.value);
-                    node.datamap.contentChanged(node);
+                    node.getDatamap().contentChanged(node);
                 }
             }
         }
@@ -220,11 +221,11 @@ public class Correction implements SelectionListener
             {
                 if (i == 0)
                 {
-                    sb.append("attribute \"" + pathTriple.attribute + "\" of type " + NodeType.ENUMERATION.getName());
+                    sb.append(NodeType.ENUMERATION.getName() + " attribute \"" + pathTriple.attribute + "\"");
                 }
                 else
                 {
-                    sb.append("attribute \"" + pathTriple.attribute + "\" of type " + NodeType.STRING.getName());
+                    sb.append(NodeType.STRING.getName() + " attribute \"" + pathTriple.attribute + "\"");
                 }
             }
             else if (pathTriple.getNodeType() == NodeType.SOAR_ID)

@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -434,26 +436,18 @@ public class Datamap implements ITreeContentProvider
 
     private static Object[] staticGetChildren(Object parent)
     {
+        List<Object> ret = null;
         if (parent instanceof DatamapNode)
         {
             DatamapNode node = (DatamapNode) parent;
 
-            List<Object> ret = new ArrayList<Object>();
+            ret = new ArrayList<Object>();
             Collection<DatamapAttribute> childAttributes = node.datamap.getAttributesFrom(node.id);
-            /*
-             * if (node.hasState()) { List<Datamap> superstateDatamaps =
-             * node.datamap.findSuperstateDatamaps(); if (superstateDatamaps !=
-             * null) { for (Datamap datamap : superstateDatamaps) {
-             * List<DatamapNode> stateNodes = datamap.getStateNodes(); if
-             * (stateNodes.size() == 1) { ret.add(new
-             * SuperstateAttribute(stateNodes.get(0))); } } } }
-             */
             ret.addAll(childAttributes);
-            return ret.toArray();
         }
         else if (parent instanceof DatamapAttribute)
         {
-            List<Object> ret = new ArrayList<Object>();
+            ret = new ArrayList<Object>();
             DatamapAttribute attribute = (DatamapAttribute) parent;
             DatamapNode child = attribute.datamap.nodes.get(attribute.to);
 
@@ -465,31 +459,47 @@ public class Datamap implements ITreeContentProvider
                     List<DatamapNode> linkedStateNodes = linkedDatamap.getStateNodes();
                     if (linkedStateNodes.size() > 0)
                     {
+                        linkedDatamap.addDatamapChangedListener(child);
                         return staticGetChildren(linkedStateNodes.get(0));
                     }
                 }
             }
-
-            /*
-             * if (child.hasState()) { List<Datamap> superstateDatamaps =
-             * child.datamap.findSuperstateDatamaps(); if (superstateDatamaps !=
-             * null) { for (Datamap datamap : superstateDatamaps) {
-             * List<DatamapNode> stateNodes = datamap.getStateNodes(); if
-             * (stateNodes.size() == 1) { ret.add(new
-             * SuperstateAttribute(stateNodes.get(0))); } } } }
-             */
             Collection<DatamapAttribute> childAttributes = child.datamap.getAttributesFrom(child.id);
             if (childAttributes == null) return null;
             ret.addAll(childAttributes);
-            return ret.toArray();
         }
-        /*
-         * else if (parent instanceof SuperstateAttribute) { return
-         * staticGetChildren(((SuperstateAttribute)
-         * parent).getSuperstateNode()); }
-         */
+        
+        if (ret == null)
+        {
+            return null;
+        }
+        
+        Collections.sort(ret, new Comparator<Object>()
+        {
 
-        return null;
+            @Override
+            public int compare(Object o1, Object o2)
+            {
+                String s1 = "" + o1;
+                String s2 = "" + o2;
+                String[] a1 = s1.split("[\\<\\>]");
+                String[] a2 = s2.split("[\\<\\>]");
+                int ret = (a1[0]).compareTo(a2[0]);
+                if (ret != 0) return ret;
+                
+                if (o1 instanceof DatamapNode && o2 instanceof DatamapNode)
+                {
+                    DatamapNode n1 = (DatamapNode) o1;
+                    DatamapNode n2 = (DatamapNode) o2;
+                    if (n1.id == n2.id) return 0;
+                    return n1.id < n2.id ? 1 : -1;
+                }
+                
+                return s1.compareTo(s2);
+            }
+        });
+        
+        return ret.toArray(new Object[0]);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package edu.umich.soar.editor.editors.datamap;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import edu.umich.soar.editor.editors.datamap.DatamapNode.NodeType;
@@ -26,7 +27,41 @@ public class DatamapAttribute
 		if (dest == null) return name;
 		if (dest.type == NodeType.SOAR_ID)
 		{
-			return name + " <" + dest.id + ">";
+		    StringBuilder sb = new StringBuilder();
+		    sb.append(name);
+		    
+		    DatamapNode target = getTarget();
+		    if (target != null)
+		    {
+		        Collection<DatamapNode> nameNodes = target.getChildren("name", NodeType.ENUMERATION);
+		        if (!nameNodes.isEmpty())
+		        {
+		            List<String> names = new ArrayList<String>();
+		            for (DatamapNode nameNode : nameNodes)
+		            {
+		                assert(nameNode.type == NodeType.ENUMERATION);
+		                for (String nameValue : nameNode.values)
+		                {
+		                    names.add(nameValue);
+		                }
+		            }
+		            sb.append(" [");
+		            for (int i = 0; i < names.size(); ++i)
+		            {
+		                sb.append(names.get(i));
+		                if (i +1 < names.size())
+		                {
+		                    sb.append(", ");
+		                }
+		            }
+		            sb.append("]");
+		        }
+		    }
+		    
+		    sb.append(" <");
+		    sb.append(dest.id);
+		    sb.append(">");
+		    return sb.toString();
 		}
 		else if (dest.type == NodeType.ENUMERATION)
 		{
@@ -46,11 +81,11 @@ public class DatamapAttribute
 		}
 		else if (dest.type == NodeType.INT_RANGE)
 		{
-			return name + " [" + dest.intMin + ", " + dest.intMax + "]";
+			return name + " (" + dest.intMin + ", " + dest.intMax + ")";
 		}
 		else if (dest.type == NodeType.FLOAT_RANGE)
 		{
-			return name + " [" + dest.floatMin + ", " + dest.floatMax + "]";
+			return name + " (" + dest.floatMin + ", " + dest.floatMax + ")";
 		}
 		else if (dest.type == NodeType.LINKED_DATAMAP)
 		{

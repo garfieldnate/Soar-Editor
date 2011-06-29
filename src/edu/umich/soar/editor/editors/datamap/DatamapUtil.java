@@ -158,9 +158,6 @@ public class DatamapUtil {
 	 * @param stateVariables Names of variables that have state. Usually just "<s>".
 	 */
 	public static ArrayList<Correction> getCorrections(List<Triple> triples, Datamap datamap, List<String> stateVariables, String stateName) {
-		
-	    
-	    
 		// Paths from the rule
 		ArrayList<TerminalPath> paths = terminalPathsForTriples(triples);
 		
@@ -186,17 +183,21 @@ public class DatamapUtil {
 			
 			// Walk down the path, keeping track of which datamap nodes
 			// correspond to the current location on the path.
-						
+			
 			for (int i = 0; i < path.size(); ++i) {
-				
+			    // The current triple for this path.
+                Triple pathTriple = path.get(i);
+                
+                if (pathTriple.attributeIsVariable())
+                {
+                    break;
+                }
+                
 				boolean anyChildren = false;
 				
 				// Children of the current datamap node that match the current triple.
 				Collection<DatamapNode> childNodes = new HashSet<DatamapNode>();
 				
-				// The current triple for this path.
-				Triple pathTriple = path.get(i);
-
 				for (DatamapNode node : currentNodes) {
 					if (pathTriple.valueIsVariable()) {
 						List<DatamapNode> variableChildren = node.getChildren(pathTriple.attribute);
