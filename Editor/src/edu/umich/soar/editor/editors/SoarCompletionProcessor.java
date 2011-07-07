@@ -69,7 +69,7 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
         int secondLastRealWhitespace = 0;
         for (int i = lastRealWhitespace - 2; i > 0 && secondLastRealWhitespace == 0; --i)
         {
-            char c = allText.charAt(i);
+              char c = allText.charAt(i);
             if (Character.isWhitespace(c))
             {
                 secondLastRealWhitespace = i + 1;
@@ -79,7 +79,7 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
         String currentWord = cursorText.substring(lastWhitespace);
         String lastRealWord = cursorText.substring(lastRealWhitespace);
         String secondLastRealWord = (lastRealWhitespace - 1 >= secondLastRealWhitespace ? cursorText.substring(secondLastRealWhitespace, lastRealWhitespace - 1) : "");
-        String secondLastWord = trimNonChars(secondLastRealWord);
+        //String secondLastWord = trimNonChars(secondLastRealWord);
         char lastChar = cursorText.length() > 0 ? cursorText.charAt(cursorText.length() - 1) : ' ';
 
         // determine paren depth
