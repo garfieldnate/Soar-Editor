@@ -67,15 +67,6 @@ public class SoarInformationControl extends AbstractInformationControl implement
             if (correction != null)
             {
                 int numSolutions = correction.getNumSolutions();
-                for (int i = 0; i < numSolutions; ++i)
-                {
-                    Link link = new Link(parent, SWT.NONE);
-                    link.setText("<a>" + correction.getSolutionText(editor, i) + "</a>");
-                    link.setBackground(parent.getBackground());
-                    link.setForeground(parent.getForeground());
-                    link.addSelectionListener(correction);
-                    link.setData(new Integer(i));
-                }
                 Datamap datamap = correction.node.getDatamap();
                 String datamapName = datamap.getFilename();
                 Link link = new Link(parent, SWT.NONE);
@@ -84,6 +75,15 @@ public class SoarInformationControl extends AbstractInformationControl implement
                 link.setForeground(parent.getForeground());
                 link.addSelectionListener(correction);
                 link.setData(new Integer(-1));
+                for (int i = 0; i < numSolutions; ++i)
+                {
+                    link = new Link(parent, SWT.NONE);
+                    link.setText("<a>" + correction.getSolutionText(editor, i) + "</a>");
+                    link.setBackground(parent.getBackground());
+                    link.setForeground(parent.getForeground());
+                    link.addSelectionListener(correction);
+                    link.setData(new Integer(i));
+                }
                 numLines += (numSolutions + 1) * 2;
             }
             lineWidth = text.length();

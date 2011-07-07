@@ -18,9 +18,11 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateCompletionProcessor;
 import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.swt.graphics.Image;
 
 import edu.umich.soar.editor.Activator;
+import edu.umich.soar.editor.contexts.SoarContext;
 import edu.umich.soar.editor.editors.datamap.Datamap;
 import edu.umich.soar.editor.editors.datamap.DatamapAttribute;
 import edu.umich.soar.editor.editors.datamap.DatamapNode;
@@ -193,6 +195,21 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
                 CompletionProposal proposeSp = new CompletionProposal(replacementString, replacementOffset, replacementLength, cursorPosition);
                 list.add(proposeSp);
             }
+        }
+        
+        if (braceDepth == 0)
+        {
+            // TODO add template proposals
+            /*
+            String contextId = SoarContext.CONTEXT_ID;
+            TemplateContextType context = Activator.getDefault().getContextTypeRegistry().getContextType(SoarContext.CONTEXT_ID);
+            for (Template template : getTemplates(null))
+            {
+                
+                template.getcon
+                list.add(new TemplateProposal(template, , region, null))                
+            }
+            */
         }
 
         ICompletionProposal[] thisRet = list.toArray(new ICompletionProposal[] {});
@@ -439,7 +456,6 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
      */
     public char[] getContextInformationAutoActivationCharacters()
     {
-
         return null;
     }
 
@@ -452,7 +468,6 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
      */
     public String getErrorMessage()
     {
-
         return null;
     }
 
@@ -464,7 +479,6 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
      */
     public IContextInformationValidator getContextInformationValidator()
     {
-
         return new ContextInformationValidator(this);
     }
 
@@ -472,7 +486,8 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
     protected TemplateContextType getContextType(ITextViewer arg0, IRegion arg1)
     {
         // TODO Auto-generated method stub
-        return null;
+        // return null;
+        return Activator.getDefault().getContextTypeRegistry().getContextType(SoarContext.CONTEXT_ID);
     }
 
     @Override

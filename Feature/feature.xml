@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="edu.umich.soar.editor.SoarEditorFeature"
-      label="Soar Editor Feature"
-      version="0.0.0.1"
+      label="Soar Editor"
+      version="0.0.0.2"
       provider-name="Soar Group at University of Michigan">
 
    <description url="http://www.example.com/description">
@@ -21,6 +21,6 @@
          id="edu.umich.soar.editor.SoarEditor"
          download-size="0"
          install-size="0"
-         version="0.0.0.1"/>
+         version="0.0.0.2"/>
 
 </feature>
