@@ -113,14 +113,6 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
         }
 
         String thisRuleText = allText.substring(lastBrace);
-        
-        /*
-         * if (cursorText.trim().length() == 0) { String ruleName =
-         * row.getName().toLowerCase().replace(' ', '-'); String proposal =
-         * "sp {" + ruleName + "\n   (state <s> ^\n\n}"; CompletionProposal
-         * proposeSp = new CompletionProposal(proposal, 0, 0, 20 +
-         * ruleName.length()); list.add(proposeSp); }
-         */
 
         HashSet<String> proposals = new HashSet<String>();
         if (parenDepth > 0)
@@ -195,21 +187,6 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
                 CompletionProposal proposeSp = new CompletionProposal(replacementString, replacementOffset, replacementLength, cursorPosition);
                 list.add(proposeSp);
             }
-        }
-        
-        if (braceDepth == 0)
-        {
-            // TODO add template proposals
-            /*
-            String contextId = SoarContext.CONTEXT_ID;
-            TemplateContextType context = Activator.getDefault().getContextTypeRegistry().getContextType(SoarContext.CONTEXT_ID);
-            for (Template template : getTemplates(null))
-            {
-                
-                template.getcon
-                list.add(new TemplateProposal(template, , region, null))                
-            }
-            */
         }
 
         ICompletionProposal[] thisRet = list.toArray(new ICompletionProposal[] {});
@@ -496,60 +473,6 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
         // TODO Auto-generated method stub
         return null;
     }
-
-    /*
-     * @Override protected Template[] getTemplates(String arg0) { // TODO
-     * Auto-generated method stub return null; }
-     */
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.jface.text.templates.TemplateCompletionProcessor#getContextType
-     * (org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
-     */
-    /*
-     * @Override protected TemplateContextType getContextType( ITextViewer
-     * viewer, IRegion region ) { Table configurationTable =
-     * configuration.getRow().getTable(); if (configurationTable == Table.RULES)
-     * { TemplateContextType context =
-     * SoarEditorUIPlugin.getDefault().getContextTypeRegistry
-     * ().getContextType(SoarRuleContext.SOAR_CONTEXT_TYPE); if (context
-     * instanceof SoarRuleContext) { ((SoarRuleContext)
-     * context).setConfiguration(configuration); } return context; } else if
-     * (configurationTable == Table.OPERATORS || configurationTable ==
-     * Table.TAGS) { TemplateContextType context =
-     * SoarEditorUIPlugin.getDefault(
-     * ).getContextTypeRegistry().getContextType(SoarOperatorContext
-     * .SOAR_CONTEXT_TYPE); if (context instanceof SoarOperatorContext) {
-     * ((SoarOperatorContext) context).setConfiguration(configuration); } return
-     * context; } return null; }
-     */
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.jface.text.templates.TemplateCompletionProcessor#getImage
-     * (org.eclipse.jface.text.templates.Template)
-     */
-    /*
-     * @Override protected Image getImage( Template template ) { ImageRegistry
-     * registry = SoarEditorUIPlugin.getDefault() .getImageRegistry(); Image
-     * image = registry.get( DEFAULT_IMAGE ); if( image == null ) {
-     * ImageDescriptor desc = AbstractUIPlugin .imageDescriptorFromPlugin(
-     * "com.soartech.soar.ide.ui", DEFAULT_IMAGE ); registry.put( DEFAULT_IMAGE,
-     * desc ); image = registry.get( DEFAULT_IMAGE ); } return image; }
-     */
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.jface.text.templates.TemplateCompletionProcessor#getTemplates
-     * (java.lang.String)
-     */
 
     @Override
     protected Template[] getTemplates(String contextTypeId)

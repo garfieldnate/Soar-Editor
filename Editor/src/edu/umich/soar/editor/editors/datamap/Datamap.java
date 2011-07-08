@@ -68,7 +68,7 @@ public class Datamap implements ITreeContentProvider
 
     public DatamapNode makeNode(String line)
     {
-        String[] tokens = line.split(" ");
+        String[] tokens = line.split("\\s+");
         if (tokens.length < 2)
         {
             return null;
@@ -137,11 +137,20 @@ public class Datamap implements ITreeContentProvider
 
     public DatamapAttribute makeAttrbute(String line)
     {
-        String[] tokens = line.split(" ");
+        String[] tokens = line.split("\\s+");
         if (tokens.length < 3) return null;
         int from = Integer.valueOf(tokens[0]);
         String name = tokens[1];
-        int to = Integer.valueOf(tokens[2]);
+        int to;
+        try
+        {
+            to = Integer.valueOf(tokens[2]);
+        }
+        catch (NumberFormatException e)
+        {
+            e.printStackTrace();
+            throw e;
+        }
         DatamapAttribute ret = new DatamapAttribute(from, name, to, this);
         return ret;
     }
@@ -468,12 +477,12 @@ public class Datamap implements ITreeContentProvider
             if (childAttributes == null) return null;
             ret.addAll(childAttributes);
         }
-        
+
         if (ret == null)
         {
             return null;
         }
-        
+
         Collections.sort(ret, new Comparator<Object>()
         {
 
@@ -486,7 +495,7 @@ public class Datamap implements ITreeContentProvider
                 String[] a2 = s2.split("[\\<\\>]");
                 int ret = (a1[0]).compareTo(a2[0]);
                 if (ret != 0) return ret;
-                
+
                 if (o1 instanceof DatamapNode && o2 instanceof DatamapNode)
                 {
                     DatamapNode n1 = (DatamapNode) o1;
@@ -494,11 +503,11 @@ public class Datamap implements ITreeContentProvider
                     if (n1.id == n2.id) return 0;
                     return n1.id < n2.id ? 1 : -1;
                 }
-                
+
                 return s1.compareTo(s2);
             }
         });
-        
+
         return ret.toArray(new Object[0]);
     }
 
@@ -724,7 +733,7 @@ public class Datamap implements ITreeContentProvider
         }
         datamap.contentChanged(null, true);
     }
-    
+
     public DatamapEditor openInEditor()
     {
         return openInEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage());

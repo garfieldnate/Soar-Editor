@@ -13,7 +13,8 @@ import edu.umich.soar.editor.editors.datamap.DatamapNode.NodeType;
 
 public class DatamapDropAdapter extends ViewerDropAdapter {
 
-	DatamapAttribute target;
+	//DatamapAttribute attributeTarget;
+	DatamapNode nodeTarget;
 	
 	public DatamapDropAdapter(Viewer viewer) {
 		super(viewer);
@@ -48,106 +49,64 @@ public class DatamapDropAdapter extends ViewerDropAdapter {
 		int operation = getCurrentOperation();
 		
 		if (operation == DND.DROP_MOVE) {
-			if (!childCanBeMovedToParent(draggedNode, target)) {
+			if (!childCanBeMovedToParent(draggedNode, nodeTarget)) {
 				return false;
 			}
-			draggedNode.setFrom(target.to);
+			draggedNode.setFrom(nodeTarget.id);
 		}
 		
 		else if (operation == DND.DROP_LINK)
 		{
-			if (!childCanBeMovedToParent(draggedNode, target)) {
+			if (!childCanBeMovedToParent(draggedNode, nodeTarget)) {
 				return false;
 			}
 			DatamapNode original = draggedNode.getTarget();
-			DatamapNode newParent = target.getTarget();
-			if (newParent.type != NodeType.SOAR_ID)
+			//DatamapNode newParent = attributeTarget.getTarget();
+			if (nodeTarget.type != NodeType.SOAR_ID)
 			{
 				return false;
 			}
-			newParent.addLink(draggedNode.name, original);
+			nodeTarget.addLink(draggedNode.name, original);
 		}
-		
-		/*	
-		 else if (operation == DND.DROP_LINK) {
-			SoarDatabaseRow dataRow = (SoarDatabaseRow) treeItem.getData();
-			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			String title = "Link items?";
-			org.eclipse.swt.graphics.Image image = shell.getDisplay().getSystemImage(SWT.ICON_QUESTION);
-			String message = "Link items \"" + dataRow.getName() + "\" and \"" + target.getName() + "\"?";
-			String[] labels = new String[] { "OK", "Cancel" };
-			MessageDialog dialog = new MessageDialog(shell, title, image, message, MessageDialog.QUESTION, labels, 0);
-			int result = dialog.open();
-			if (result != 0) {
-				return false;
-			}
-
-			LinkDatamapRowsAction action = new LinkDatamapRowsAction(dataRow, target);
-			action.run();
-		}
-		*/
 		
 		return true;
 	}
 
 	@Override
 	public boolean validateDrop(Object target, int operation, TransferData targetType) {
-		this.target = null;
+		this.nodeTarget = null;
 		
-		/*
-		
-		System.out.println("Validate w/ operation: " + operation);
-		
-		Object obj = super.getSelectedObject();
-		if (!(obj instanceof SoarDatabaseRow)) {
-			return false;
-		}
-		SoarDatabaseRow first = (SoarDatabaseRow) obj;
-		if (!first.isDatamapNode()) {
-			return false;
-		}
-		if (!(target instanceof SoarDatabaseRow)) {
-			return false;
-		}
-		SoarDatabaseRow second = (SoarDatabaseRow) target;
-		if (!second.isDatamapNode()) {
-			return false;
-		}
-		
-		// first and second are both datamap rows
-		
-		if (operation == DND.DROP_MOVE) {
-			// Move operation
-			// Make sure second is a possible parent of first.
-			if (!childCanBeMovedToParent(first, second)) {
-				return false;
-			}
-		}
-		*/
-		/*
-		else if (operation == DND.DROP_LINK) {
-			// Link operation
-			// Make sure they are both identifiers
-			if (first.getTable() != Table.DATAMAP_IDENTIFIERS
-					|| first.getTable() != second.getTable()) {
-				return false;
-			}
-		}
-		*/
 		if (target instanceof DatamapAttribute)
 		{
 			DatamapAttribute attrTarget = (DatamapAttribute) target;
 			if (attrTarget.getTarget().type == NodeType.SOAR_ID)
 			{
-				this.target = attrTarget;
+				this.nodeTarget = attrTarget.getTarget();
 				return true;
 			}
 		}
-		return false;
-	}
-	
-	private boolean childCanBeMovedToParent(DatamapAttribute child, DatamapAttribute parent) {
-		if (child == null || parent == null) return false;
+		
+		// Allow drops onto root <s> node
+		if (target instanceof DatamapNode)
+		{
+		    DatamapNode nodeTarget = (DatamapNode) target;
+		    if (nodeTarget.type == NodeType.SOAR_ID)
+		    {
+		        this.nodeTarget = nodeTarget;
+		        return true;
+		    }
+		}
 		return true;
 	}
+	
+    private boolean childCanBeMovedToParent(DatamapAttribute child, DatamapAttribute parent) {
+        if (child == null || parent == null) return false;
+        return childCanBeMovedToParent(child, parent.getTarget());
+    }
+    
+    private boolean childCanBeMovedToParent(DatamapAttribute child, DatamapNode parent) {
+        if (child == null || parent == null) return false;
+        if (child.datamap != parent.getDatamap()) return false;
+        return true;
+    }
 }

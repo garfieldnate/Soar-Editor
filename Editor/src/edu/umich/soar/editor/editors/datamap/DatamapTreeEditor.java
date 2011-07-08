@@ -141,7 +141,7 @@ public class DatamapTreeEditor extends EditorPart implements IPropertyListener, 
 		manager.addMenuListener(new DatamapRightClickMenuListener(tree, datamap));
 		Menu menu = manager.createContextMenu(tree.getTree());
 		tree.getTree().setMenu(menu);
-		
+		tree.addDoubleClickListener(new DatamapDoubleClickListener(tree, datamap));
 		tree.addDragSupport(DND.DROP_MOVE | DND.DROP_LINK, new Transfer[] {LocalSelectionTransfer.getTransfer()}, new DatamapDragAdapter());
         tree.addDropSupport(DND.DROP_MOVE | DND.DROP_LINK, new Transfer[] {LocalSelectionTransfer.getTransfer()}, new DatamapDropAdapter(tree));
         
