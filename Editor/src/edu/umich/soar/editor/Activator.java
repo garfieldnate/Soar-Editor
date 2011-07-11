@@ -14,7 +14,7 @@ import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import edu.umich.soar.editor.contexts.SoarContext;
+import edu.umich.soar.editor.contexts.SoarContextType;
 import edu.umich.soar.editor.icons.SoarIcons;
 
 /**
@@ -120,7 +120,7 @@ public class Activator extends AbstractUIPlugin {
         if (contextRegistry == null)
         {
             contextRegistry = new ContributionContextTypeRegistry();
-            contextRegistry.addContextType(SoarContext.CONTEXT_ID);
+            contextRegistry.addContextType(SoarContextType.CONTEXT_ID);
         }
         return contextRegistry;
     }

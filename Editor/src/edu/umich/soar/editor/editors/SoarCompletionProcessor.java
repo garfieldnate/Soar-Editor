@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
@@ -18,11 +19,10 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateCompletionProcessor;
 import org.eclipse.jface.text.templates.TemplateContextType;
-import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.swt.graphics.Image;
 
 import edu.umich.soar.editor.Activator;
-import edu.umich.soar.editor.contexts.SoarContext;
+import edu.umich.soar.editor.contexts.SoarContextType;
 import edu.umich.soar.editor.editors.datamap.Datamap;
 import edu.umich.soar.editor.editors.datamap.DatamapAttribute;
 import edu.umich.soar.editor.editors.datamap.DatamapNode;
@@ -460,11 +460,12 @@ public class SoarCompletionProcessor extends TemplateCompletionProcessor
     }
 
     @Override
-    protected TemplateContextType getContextType(ITextViewer arg0, IRegion arg1)
+    protected TemplateContextType getContextType(ITextViewer viewer, IRegion region)
     {
-        // TODO Auto-generated method stub
-        // return null;
-        return Activator.getDefault().getContextTypeRegistry().getContextType(SoarContext.CONTEXT_ID);
+        SoarEditor editor = configuration.getEditor();
+        SoarContextType contextType = (SoarContextType) Activator.getDefault().getContextTypeRegistry().getContextType(SoarContextType.CONTEXT_ID);
+        contextType.setEditor(editor);
+        return contextType;
     }
 
     @Override

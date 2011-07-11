@@ -99,7 +99,7 @@
         point="org.eclipse.ui.editors.templates">
            
      <contextType
-           class="edu.umich.soar.editor.contexts.SoarContext"
+           class="edu.umich.soar.editor.contexts.SoarContextType"
            id="edu.umich.soar.editor.contexts.SoarContext"
            name="Soar Context"/>
      <template
@@ -114,8 +114,8 @@ sp {${problemspace}*compare*${operator}
    (state &lt;s&gt; ^name ${problemspace}
               ^operator &lt;op1&gt; +
                         &lt;op2&gt; +)
-   (&lt;op1&gt; ^name ${operator})
-   (&lt;op2&gt; ^name)
+   (&lt;op1&gt; ^name ${op1})
+   (&lt;op2&gt; ^name ${op2})
 --&gt;
    (&lt;s&gt; ^operator &lt;op1&gt; &gt; &lt;op2&gt;)
 }
@@ -134,7 +134,7 @@ sp {${problemspace}*apply*${operator}
    (state &lt;s&gt; ^operator &lt;op&gt;)
    (&lt;op&gt; ^name ${operator})
 --&gt;
-   (&lt;s&gt;)
+   (&lt;s&gt; ^${})
 }
         </pattern>
      </template>
@@ -152,7 +152,7 @@ sp {${problemspace}*elaborate-state*substate
               ^superstate.operator &lt;so&gt;)
    (&lt;so&gt; ^name ${superstateoperator})
 --&gt;
-   (&lt;s&gt;)
+   (&lt;s&gt; ^${})
 }
         </pattern>
      </template>
@@ -185,7 +185,7 @@ sp {${problemspace}*propose*${operator}
 sp {${problemspace}*elaborate-operator*${operator}
    (state &lt;s&gt; ^name ${problemspace})
 --&gt;
-   (&lt;s&gt;)
+   (&lt;s&gt; ^${})
 }
         </pattern>
      </template>

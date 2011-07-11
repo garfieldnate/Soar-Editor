@@ -43,6 +43,7 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
     private List<IFile> datamapFiles;
     private List<Datamap> datamaps;
     String folderName;
+    String parentFolderName;
 
     public SoarEditor()
     {
@@ -57,17 +58,35 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
     {
         super.init(site, input);
         findDatamaps(input);
-
         FileEditorInput fileInput = (FileEditorInput) input;
         IFile file = fileInput.getFile();
-        folderName = file.getParent().getName();
+        findStateNames(file);
+        findProblems(getProgressMonitor(), file);
+    }
+
+    private void findStateNames(IFile file)
+    {
+        // Find folder name
+        // and parent folder name
+        IContainer folder = file.getParent();
+        if (folder == null) return;
+        folderName = folder.getName();
         if (folderName.equals("elaborations"))
         {
-            IContainer container = file.getParent().getParent();
-            String containerName = container.getName();
-            folderName = containerName;
+            folder = folder.getParent();
+            if (folder == null) return;
+            folderName = folder.getName();
         }
-        findProblems(getProgressMonitor(), file);
+
+        IContainer parent = folder.getParent();
+        if (parent == null) return;
+        parentFolderName = parent.getName();
+        if (parentFolderName.equals("elaborations"))
+        {
+            parent = parent.getParent();
+            if (parent == null) return;
+            parentFolderName = parent.getName();
+        }
     }
 
     public List<Datamap> getDatamaps()
@@ -89,24 +108,23 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
 
             // Datamap datamap = null;
             /*
-            IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-            IEditorPart part = page.findEditor(new FileEditorInput(file));
-            if (part != null && part instanceof DatamapEditor)
-            {
-                DatamapEditor editor = (DatamapEditor) part;
-                datamap = editor.getDatamap();
-            }
-            */
+             * IWorkbenchPage page =
+             * PlatformUI.getWorkbench().getActiveWorkbenchWindow
+             * ().getActivePage(); IEditorPart part = page.findEditor(new
+             * FileEditorInput(file)); if (part != null && part instanceof
+             * DatamapEditor) { DatamapEditor editor = (DatamapEditor) part;
+             * datamap = editor.getDatamap(); }
+             */
 
-            //if (datamap == null)
-            //{
+            // if (datamap == null)
+            // {
             Datamap datamap = Datamap.read(file);
-            //}
+            // }
             if (datamap != null)
             {
                 datamaps.add(datamap);
                 datamap.addDatamapChangedListener(this);
-                
+
             }
         }
     }
@@ -229,12 +247,12 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
             List<Correction> corrections = null;
             boolean first = true;
             List<Datamap> datamaps = getDatamaps();
-            
+
             if (stateVariables.size() == 0)
             {
                 addError(resource, new SoarParseError("No state variables found in rule " + ast.getName(), ast.getRuleOffset(), 0));
             }
-            
+
             for (Datamap datamap : datamaps)
             {
                 if (first)
@@ -263,7 +281,7 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
         }
         return true;
     }
-    
+
     private static void addErrors(IResource resource, List<SoarParseError> errors)
     {
         for (SoarParseError error : errors)
@@ -271,7 +289,7 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
             addError(resource, error);
         }
     }
-    
+
     private static void addError(IResource resource, SoarParseError error)
     {
         System.out.println("ERROR, " + error.message + ", " + error.start);
@@ -290,7 +308,7 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
             e.printStackTrace();
         }
     }
-    
+
     private void addCorrections(IResource resource, List<Correction> corrections, SoarProductionAst ast)
     {
         for (Correction correction : corrections)
@@ -298,7 +316,7 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
             addCorrection(resource, correction, ast);
         }
     }
-    
+
     private void addCorrection(IResource resource, Correction correction, SoarProductionAst ast)
     {
         System.out.println(correction);
@@ -323,7 +341,6 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
             e.printStackTrace();
         }
     }
-
 
     private static String keyForMarker(IMarker marker)
     {
@@ -354,6 +371,19 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
     public String getFolderName()
     {
         return folderName;
+    }
+
+    public String getParentFolderName()
+    {
+        return parentFolderName;
+    }
+
+    public String getFileName()
+    {
+        IEditorInput input = getEditorInput();
+        if (!(input instanceof FileEditorInput)) return null;
+        FileEditorInput fileEditorInput = (FileEditorInput) input;
+        return fileEditorInput.getPath().removeFileExtension().lastSegment();
     }
 
     @Override
