@@ -15,7 +15,7 @@
             class="edu.umich.soar.editor.editors.datamap.DatamapEditor"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             extensions="dm"
-            icon="icons/a_flag.gif"
+            icon="icons/s_flag.gif"
             id="edu.umich.soar.editor.editors.datamap.DatamapEditor"
             name="Datamap Editor">
       </editor>
@@ -90,6 +90,16 @@
 	   category="edu.umich.soar.editor.wizards.SoarCategory"
 	   icon="icons/s_flag.gif">
     	   <description>New Soar File</description>
+	   <selection class="org.eclipse.core.resources.IResource"/>
+	</wizard>
+	
+		 	<wizard
+	   id = "edu.umich.soar.editor.wizards.SoarProblemSpaceWizard"
+      	   name = "Soar Problem Space"
+	   class="edu.umich.soar.editor.wizards.SoarProblemSpaceWizard"
+	   category="edu.umich.soar.editor.wizards.SoarCategory"
+	   icon="icons/attribute.gif">
+    	   <description>New Soar Problem Space</description>
 	   <selection class="org.eclipse.core.resources.IResource"/>
 	</wizard>
 	
