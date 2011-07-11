@@ -42,7 +42,7 @@ public class SoarProblemSpaceWizard extends Wizard implements INewWizard
         if (folder == null) return false;
 
         // Add source.soar to the problem space.
-        IFile sourceFile = folder.getFile("source.soar");
+        IFile sourceFile = folder.getFile(folder.getName() + "_source.soar");
         try
         {
             sourceFile.create(new ByteArrayInputStream("".getBytes()), false, null);
@@ -58,7 +58,7 @@ public class SoarProblemSpaceWizard extends Wizard implements INewWizard
         IContainer parent = folder.getParent();
         if (parent != null)
         {
-            IFile parentSourceFile = parent.getFile(new Path("source.soar"));
+            IFile parentSourceFile = parent.getFile(new Path(parent.getName() + "_source.soar"));
             if (parentSourceFile != null)
             {
                 String newlines = "\n\n";
@@ -77,7 +77,7 @@ public class SoarProblemSpaceWizard extends Wizard implements INewWizard
                 if (parentSourceFile.exists())
                 {
                     String folderName = folder.getName();
-                    String append = newlines + "# Source child problem space \"" + folderName + "\"\npushd " + folder.getName() + "\nsource source.soar\npopd";
+                    String append = newlines + "# Source child problem space \"" + folderName + "\"\npushd " + folder.getName() + "\nsource " + folderName + "_source.soar\npopd";
                     try
                     {
                         parentSourceFile.appendContents(new ByteArrayInputStream(append.getBytes()), false, true, null);

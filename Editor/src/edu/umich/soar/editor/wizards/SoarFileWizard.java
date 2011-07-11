@@ -44,7 +44,7 @@ public class SoarFileWizard extends Wizard implements INewWizard {
 		IContainer parent = file.getParent();
 		if (parent != null && parent.exists())
 		{
-		    IFile sourceFile = parent.getFile(new Path("source.soar"));
+		    IFile sourceFile = parent.getFile(new Path(parent.getName() + "_source.soar"));
 		    if (sourceFile != null && sourceFile.exists())
 		    {
 		        String filename = page.getFileName();
