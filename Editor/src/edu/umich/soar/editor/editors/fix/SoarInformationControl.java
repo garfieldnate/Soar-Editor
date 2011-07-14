@@ -41,7 +41,7 @@ public class SoarInformationControl extends AbstractInformationControl implement
     @Override
     public void setInput(Object input)
     {
-        //getShell().setSize(600, 300);
+        // getShell().setSize(600, 300);
         this.input = input;
         int numLines = 3;
         int lineWidth = 10;
@@ -75,10 +75,20 @@ public class SoarInformationControl extends AbstractInformationControl implement
                 link.setForeground(parent.getForeground());
                 link.addSelectionListener(correction);
                 link.setData(new Integer(-1));
+
+                String baseSolutionText = correction.getBaseSolutionText();
+                if (baseSolutionText != null)
+                {
+                    Label baseLabel = new Label(parent, SWT.None);
+                    baseLabel.setText(baseSolutionText);
+                    baseLabel.setBackground(parent.getBackground());
+                    baseLabel.setForeground(parent.getForeground());
+                }
+
                 for (int i = 0; i < numSolutions; ++i)
                 {
                     link = new Link(parent, SWT.NONE);
-                    link.setText("<a>" + correction.getSolutionText(editor, i) + "</a>");
+                    link.setText("<a>" + correction.getEndSolutionText(i) + "</a>");
                     link.setBackground(parent.getBackground());
                     link.setForeground(parent.getForeground());
                     link.addSelectionListener(correction);
@@ -103,7 +113,7 @@ public class SoarInformationControl extends AbstractInformationControl implement
         setForegroundColor(this.parent.getForeground());
         // new Button(parent, 0);
     }
-    
+
     @Override
     public IInformationControlCreator getInformationPresenterControlCreator()
     {
@@ -118,5 +128,5 @@ public class SoarInformationControl extends AbstractInformationControl implement
             }
         };
     }
-    
+
 }

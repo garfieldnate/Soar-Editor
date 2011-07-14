@@ -142,4 +142,10 @@ public class SoarConfiguration extends SourceViewerConfiguration {
 		return editor;
 	}
 
+	@Override
+	public String[] getDefaultPrefixes(ISourceViewer sourceViewer, String contentType)
+	{
+	    return (IDocument.DEFAULT_CONTENT_TYPE.equals(contentType) ? new String[] { "#" } : null);
+	}
+	
 }

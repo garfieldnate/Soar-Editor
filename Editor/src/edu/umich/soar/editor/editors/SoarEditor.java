@@ -3,6 +3,7 @@ package edu.umich.soar.editor.editors;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListResourceBundle;
 import java.util.Map;
 
 import org.eclipse.core.resources.IContainer;
@@ -10,27 +11,23 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.texteditor.DocumentProviderRegistry;
-import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import com.soartech.soar.ide.core.ast.SoarProductionAst;
 
 import edu.umich.soar.editor.editors.SoarRuleParser.SoarParseError;
+import edu.umich.soar.editor.editors.actions.SoarEditorActionStrings;
+import edu.umich.soar.editor.editors.actions.ToggleCommentAction;
 import edu.umich.soar.editor.editors.datamap.Correction;
 import edu.umich.soar.editor.editors.datamap.Datamap;
 import edu.umich.soar.editor.editors.datamap.Datamap.DatamapChangedListener;
-import edu.umich.soar.editor.editors.datamap.DatamapUtil;
-import edu.umich.soar.editor.editors.datamap.Triple;
-import edu.umich.soar.editor.editors.datamap.TripleExtractor;
 
 public class SoarEditor extends TextEditor implements DatamapChangedListener
 {
@@ -61,44 +58,63 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
         FileEditorInput fileInput = (FileEditorInput) input;
         IFile file = fileInput.getFile();
         findStateNames(file);
-        findProblems(getProgressMonitor(), file);
+        SoarEditorUtil.findProblems(file, this, getProgressMonitor());
+    }
+    
+    @Override
+    protected void createActions()
+    {
+        super.createActions();
+        getSite().getKeyBindingService().setScopes(new String[] { SoarEditorActionStrings.SOAR_SCOPE_ID });
+        ListResourceBundle bundle = new ListResourceBundle()
+        {
+
+            @Override
+            protected Object[][] getContents()
+            {
+                return new Object[][] {};
+            }
+            
+        };
+        ToggleCommentAction action = new ToggleCommentAction(bundle, "ToggleComment", this);
+        action.setActionDefinitionId(SoarEditorActionStrings.TOGGLE_COMMENT);
+        setAction("ToggleComment", action);
+        markAsStateDependentAction("ToggleComment", true);
+        action.configure(getSourceViewer(), getSourceViewerConfiguration());
     }
 
     private void findStateNames(IFile file)
     {
         // Find folder name
         // and parent folder name
-        IContainer folder = file.getParent();
+        IContainer folder = SoarEditorUtil.getProblemSpaceParent(file);
         if (folder == null) return;
         folderName = folder.getName();
-        if (folderName.equals("elaborations"))
-        {
-            folder = folder.getParent();
-            if (folder == null) return;
-            folderName = folder.getName();
-        }
 
-        IContainer parent = folder.getParent();
+        IContainer parent = SoarEditorUtil.getProblemSpaceParent(folder);
         if (parent == null) return;
         parentFolderName = parent.getName();
-        if (parentFolderName.equals("elaborations"))
-        {
-            parent = parent.getParent();
-            if (parent == null) return;
-            parentFolderName = parent.getName();
-        }
     }
+   
 
     public List<Datamap> getDatamaps()
     {
-        findDatamaps(getEditorInput());
-        buildDatamaps();
+        datamapFiles = findDatamaps(getEditorInput());
+        datamaps = buildDatamaps(datamapFiles, this);
+        return datamaps;
+    }
+    
+    public static List<Datamap> staticGetDatamaps(IResource input, SoarEditor editor)
+    {
+        if (editor != null) return editor.getDatamaps();
+        List<IFile> datamapFiles = findDatamaps(input);
+        List<Datamap> datamaps = buildDatamaps(datamapFiles, editor);
         return datamaps;
     }
 
-    private void buildDatamaps()
+    private static List<Datamap> buildDatamaps(List<IFile> datamapFiles, SoarEditor editor)
     {
-        datamaps = new ArrayList<Datamap>();
+        List<Datamap> ret = new ArrayList<Datamap>();
         for (IFile file : datamapFiles)
         {
             if (file.getName().equals("comment.dm"))
@@ -122,56 +138,76 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
             // }
             if (datamap != null)
             {
-                datamaps.add(datamap);
-                datamap.addDatamapChangedListener(this);
-
+                ret.add(datamap);
+                if (editor != null)
+                {
+                    datamap.addDatamapChangedListener(editor);
+                }
             }
         }
+        return ret;
     }
-
-    private void findDatamaps(IEditorInput input)
+    
+    /**
+     * Find a list of datamap files corresponding to the given IEditorInput.
+     * @param input
+     * @return
+     */
+    private static ArrayList<IFile> findDatamaps(IEditorInput input)
     {
-        datamapFiles = new ArrayList<IFile>();
         if (!(input instanceof FileEditorInput))
         {
-            return;
+            return new ArrayList<IFile>();
         }
+        
         IFile file = ((FileEditorInput) input).getFile();
-        IContainer parent = file.getParent();
-        if (parent == null) return;
+        return findDatamaps(file);
+    }
+
+    /**
+     * Find a list of datamap files corresponding to the given IResource.
+     * @param input
+     * @return
+     */
+    private static ArrayList<IFile> findDatamaps(IResource input)
+    {
+        ArrayList<IFile> ret = new ArrayList<IFile>();
+        IContainer parent = input.getParent();
+        if (parent == null) return ret;
         try
         {
             for (IResource member : parent.members())
             {
                 if (member instanceof IFile && member.getFileExtension().equalsIgnoreCase("dm"))
                 {
-                    datamapFiles.add((IFile) member);
+                    ret.add((IFile) member);
                 }
             }
         }
         catch (CoreException e)
         {
             e.printStackTrace();
-            return;
+            return ret;
         }
-        if (datamapFiles.size() != 0) return;
+        if (ret.size() != 0) return ret;
         parent = parent.getParent();
-        if (parent == null) return;
+        if (parent == null) return ret;
         try
         {
             for (IResource member : parent.members())
             {
                 if (member instanceof IFile && member.getFileExtension().equalsIgnoreCase("dm"))
                 {
-                    datamapFiles.add((IFile) member);
+                    ret.add((IFile) member);
                 }
             }
         }
         catch (CoreException e)
         {
             e.printStackTrace();
-            return;
+            return ret;
         }
+        return ret;
     }
 
     public void dispose()
@@ -189,100 +225,11 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
         if (!(input instanceof FileEditorInput)) return;
         FileEditorInput fileInput = (FileEditorInput) input;
         IFile file = fileInput.getFile();
-        findProblems(progressMonitor, file);
+        SoarEditorUtil.findProblems(file, this, progressMonitor);
     }
 
-    private boolean findProblems(IProgressMonitor monitor, IResource resource)
-    {
-        try
-        {
-            IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-            for (IMarker marker : markers)
-            {
-                removeCorrection(marker);
-            }
-        }
-        catch (CoreException e2)
-        {
-            e2.printStackTrace();
-        }
-        try
-        {
-            resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-        }
-        catch (CoreException e1)
-        {
-            e1.printStackTrace();
-        }
-        IDocumentProvider docProvider = getDocumentProvider();
-        IEditorInput editorInput = getEditorInput();
-        if (docProvider == null)
-        {
-            docProvider = DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
-        }
-        if (docProvider == null)
-        {
-            return false;
-        }
-        if (!(editorInput instanceof IFileEditorInput))
-        {
-            return false;
-        }
-        IFileEditorInput fileEditorInput = (IFileEditorInput) editorInput;
-        IDocument doc = docProvider.getDocument(editorInput);
-        if (doc == null) return false;
-        String text = doc.get();
-        IContainer parentContainer = fileEditorInput.getFile().getParent();
-        String basePath = parentContainer.getLocation().toOSString();
-        List<SoarParseError> errors = new ArrayList<SoarParseError>();
-        List<SoarProductionAst> asts = new ArrayList<SoarProductionAst>();
-        SoarRuleParser.parseRules(text, monitor, errors, asts, basePath, true);
-        addErrors(resource, errors);
-        ArrayList<String> stateVariables = new ArrayList<String>();
-        for (SoarProductionAst ast : asts)
-        {
-            System.out.println("ast " + ast.getName() + ", " + ast.getRuleOffset());
-            stateVariables.clear();
-            List<Triple> triples = TripleExtractor.makeTriples(ast, stateVariables);
-            List<Correction> corrections = null;
-            boolean first = true;
-            List<Datamap> datamaps = getDatamaps();
 
-            if (stateVariables.size() == 0)
-            {
-                addError(resource, new SoarParseError("No state variables found in rule " + ast.getName(), ast.getRuleOffset(), 0));
-            }
-
-            for (Datamap datamap : datamaps)
-            {
-                if (first)
-                {
-                    first = false;
-                    corrections = DatamapUtil.getCorrections(triples, datamap, stateVariables, folderName);
-                }
-                else
-                {
-                    List<Correction> newCorrections = DatamapUtil.getCorrections(triples, datamap, stateVariables, folderName);
-                    List<Correction> toRemove = new ArrayList<Correction>();
-                    for (Correction correction : corrections)
-                    {
-                        if (!newCorrections.contains(correction))
-                        {
-                            toRemove.add(correction);
-                        }
-                    }
-                    corrections.removeAll(toRemove);
-                }
-            }
-            if (corrections != null)
-            {
-                addCorrections(resource, corrections, ast);
-            }
-        }
-        return true;
-    }
-
-    private static void addErrors(IResource resource, List<SoarParseError> errors)
+    public static void addErrors(IResource resource, List<SoarParseError> errors)
     {
         for (SoarParseError error : errors)
         {
@@ -290,7 +237,7 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
         }
     }
 
-    private static void addError(IResource resource, SoarParseError error)
+    public static void addError(IResource resource, SoarParseError error)
     {
         System.out.println("ERROR, " + error.message + ", " + error.start);
         IMarker marker;
@@ -309,7 +256,7 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
         }
     }
 
-    private void addCorrections(IResource resource, List<Correction> corrections, SoarProductionAst ast)
+    public void addCorrections(IResource resource, List<Correction> corrections, SoarProductionAst ast)
     {
         for (Correction correction : corrections)
         {
@@ -357,7 +304,7 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
         correctionMap.put(keyForMarker(marker), correction);
     }
 
-    private void removeCorrection(IMarker marker)
+    public void removeCorrection(IMarker marker)
     {
         correctionMap.remove(marker);
     }
@@ -391,6 +338,6 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
     {
         FileEditorInput fileInput = (FileEditorInput) getEditorInput();
         IFile file = fileInput.getFile();
-        return findProblems(getProgressMonitor(), file);
+        return SoarEditorUtil.findProblems(file, this, getProgressMonitor());
     }
 }

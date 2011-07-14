@@ -44,12 +44,12 @@ public class Correction implements SelectionListener
         this.pathTriple = pathTriple;
         this.anyChildren = anyChildren;
         this.pathSoFar = pathSoFar;
-        
+
         // Handle special case where pathTriple's value is variable
         // and node is not of type SOAR_ID
         if (node.type != NodeType.SOAR_ID && pathTriple.valueIsVariable())
         {
-            
+
         }
     }
 
@@ -205,40 +205,46 @@ public class Correction implements SelectionListener
         return 1;
     }
 
-    public String getSolutionText(SoarEditor editor, int i)
+    public String getBaseSolutionText()
     {
-        List<Datamap> datamaps = editor.getDatamaps();
-        String folderName = editor.getFolderName();
-        StringBuffer sb = new StringBuffer();
-        sb.append("Add ");
         if (anyChildren)
         {
-            sb.append("value \"" + pathTriple.value + "\"");
+            return null;
         }
-        else
+        return "Add attribute \"" + pathTriple.attribute + "\" of type:";
+    }
+
+    public String getEndSolutionText(int i)
+    {
+        if (anyChildren)
         {
-            if (pathTriple.getNodeType() == NodeType.STRING)
+            return "Add value \"" + pathTriple.value + "\"";
+        }
+        if (pathTriple.getNodeType() == NodeType.STRING)
+        {
+            if (i == 0)
             {
-                if (i == 0)
-                {
-                    sb.append(NodeType.ENUMERATION.getName() + " attribute \"" + pathTriple.attribute + "\"");
-                }
-                else
-                {
-                    sb.append(NodeType.STRING.getName() + " attribute \"" + pathTriple.attribute + "\"");
-                }
-            }
-            else if (pathTriple.getNodeType() == NodeType.SOAR_ID)
-            {
-                NodeType type = NodeType.values()[i];
-                sb.append("attribute \"" + pathTriple.attribute + "\" of type " + type.getName());
+                return NodeType.ENUMERATION.getName();
             }
             else
             {
-                sb.append("attribute \"" + pathTriple.attribute + "\" of type " + pathTriple.getTypeString());
+                 return NodeType.STRING.getName();
             }
         }
-        return sb.toString();
+        else if (pathTriple.getNodeType() == NodeType.SOAR_ID)
+        {
+            NodeType type = NodeType.values()[i];
+            return type.getName();
+        }
+        else
+        {
+            return pathTriple.getTypeString();
+        }
+    }
+    
+    public String getSolutionText(int i)
+    {
+        return getBaseSolutionText() + " " + getEndSolutionText(i);
     }
 
     /**
