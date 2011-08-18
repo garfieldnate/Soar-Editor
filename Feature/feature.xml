@@ -2,7 +2,7 @@
 <feature
       id="edu.umich.soar.editor.SoarEditorFeature"
       label="Soar Editor"
-      version="0.0.0.10"
+      version="0.0.1.0"
       provider-name="Soar Group at University of Michigan">
 
    <description url="http://www.example.com/description">
