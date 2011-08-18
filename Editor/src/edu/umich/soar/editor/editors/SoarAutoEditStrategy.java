@@ -284,20 +284,16 @@ public class SoarAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         
         String trimmed = curLine.trim();
         if(
-//           ((trimmed.startsWith("sp")) && (trimmed.indexOf("{") != -1)) || 
            ((trimmed.startsWith("(")) && (trimmed.endsWith(")"))) ||
-//           ((trimmed.startsWith("^")) && (trimmed.endsWith(")"))) ||
            ((trimmed.startsWith("[")) && (trimmed.endsWith("]"))) ||
            (trimmed.startsWith(":")))
-//           (trimmed.startsWith("-->")))
         {
-            //align indent with previous line
             numSpaces = getIndentAmount(curLine);
         }
         else if(((trimmed.startsWith("sp")) && (trimmed.indexOf("{") != -1)) ||
                 (trimmed.startsWith("-->")))
         {   
-            numSpaces = 3; // getIndentPrefs().getTabWidth();
+            numSpaces = 3;
         }
         else if((trimmed.endsWith(")")))
         {
@@ -323,7 +319,6 @@ public class SoarAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         
         return numSpaces;
     }
-    
 
     /**
      * Add spaces to the given command's text to indent it as much as the

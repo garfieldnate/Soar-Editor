@@ -23,6 +23,7 @@ import org.eclipse.ui.part.FileEditorInput;
 import com.soartech.soar.ide.core.ast.SoarProductionAst;
 
 import edu.umich.soar.editor.editors.SoarRuleParser.SoarParseError;
+import edu.umich.soar.editor.editors.actions.FormatAction;
 import edu.umich.soar.editor.editors.actions.SoarEditorActionStrings;
 import edu.umich.soar.editor.editors.actions.ToggleCommentAction;
 import edu.umich.soar.editor.editors.datamap.Correction;
@@ -80,6 +81,12 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
         action.setActionDefinitionId(SoarEditorActionStrings.TOGGLE_COMMENT);
         setAction("ToggleComment", action);
         markAsStateDependentAction("ToggleComment", true);
+        action.configure(getSourceViewer(), getSourceViewerConfiguration());
+        
+        FormatAction format = new FormatAction(bundle, "Format", this);
+        action.setActionDefinitionId(SoarEditorActionStrings.FORMAT);
+        setAction("Format", format);
+        markAsStateDependentAction("Format", true);
         action.configure(getSourceViewer(), getSourceViewerConfiguration());
     }
 
