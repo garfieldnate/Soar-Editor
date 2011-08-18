@@ -30,6 +30,8 @@ import edu.umich.soar.editor.editors.datamap.TripleExtractor;
 public class SoarEditorUtil
 {
     
+    public static final String NEWLINE = System.getProperty("line.separator");
+    
     public static boolean findProblems(IResource resource)
     {
         return findProblems(resource, null, null);
@@ -143,7 +145,7 @@ public class SoarEditorUtil
             Scanner scanner = new Scanner(is);
             while (scanner.hasNext())
             {
-                sb.append(scanner.nextLine() + '\n');
+                sb.append(scanner.nextLine() + NEWLINE);
             }
             scanner.close();
             is.close();
