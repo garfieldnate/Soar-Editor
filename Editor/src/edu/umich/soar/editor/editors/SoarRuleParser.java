@@ -4,9 +4,10 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.ui.IFileEditorInput;
 
 import tcl.lang.RelocatableTclInterpreter;
 import tcl.lang.TclException;
@@ -71,7 +72,16 @@ public class SoarRuleParser
             rule = rule.substring(4, rule.length() - 1);
             Scanner s = new Scanner(rule);
             String ruleName = s.next();
-            int ruleOffset = text.indexOf(ruleName);
+            
+            // int ruleOffset = text.indexOf(ruleName);
+            int ruleOffset = -1;
+            Pattern pattern = Pattern.compile("sp\\s*\\{(" + Pattern.quote(ruleName) + ")\\s");
+            Matcher matcher = pattern.matcher(text);
+            if (matcher.find())
+            {
+                ruleOffset = matcher.start(1);
+            }
+            
             // rule = removeComments(rule);
 
             // Parse the rule into an AST.
