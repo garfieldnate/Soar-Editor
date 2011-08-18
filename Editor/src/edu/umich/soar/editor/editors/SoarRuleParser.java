@@ -75,7 +75,7 @@ public class SoarRuleParser
             
             // int ruleOffset = text.indexOf(ruleName);
             int ruleOffset = -1;
-            Pattern pattern = Pattern.compile("sp\\s*\\{(" + Pattern.quote(ruleName) + ")\\s");
+            Pattern pattern = Pattern.compile("sp\\s*\\{\\s*(" + Pattern.quote(ruleName) + ")\\s");
             Matcher matcher = pattern.matcher(text);
             if (matcher.find())
             {
