@@ -32,6 +32,7 @@ public class SoarProblemSpaceWizard extends Wizard implements INewWizard
     public void addPages()
     {
         page = new SoarProblemSpaceWizardPage(selection, this);
+        // page.set
         addPage(page);
     }
 
@@ -91,6 +92,14 @@ public class SoarProblemSpaceWizard extends Wizard implements INewWizard
         }
 
         return true;
+    }
+
+    public void setDefaultName(String name)
+    {
+        if (name == null)
+        {
+            return;
+        }
     }
 
     /*

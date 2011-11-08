@@ -93,11 +93,8 @@ public class SoarSearchResultsView extends ViewPart implements IDoubleClickListe
                 SoarEditor editor = (SoarEditor) part;
                 int begin = item.getOffset() - 1; // -1 to convert 1-indexed value
                 int length = item.getLength();
-                /*
                 editor.resetHighlightRange();
                 editor.setHighlightRange(begin, length, true);
-                */
-                editor.selectAndReveal(begin, length);
             }
         }
         catch (PartInitException e)

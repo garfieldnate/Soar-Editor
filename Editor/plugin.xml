@@ -243,20 +243,63 @@ sp {${problemspace}*elaborate-operator*${operator}
         </pattern>
      </template>
    </extension>
-   
-	<extension point="org.eclipse.ui.popupMenus"> 
-	<objectContribution 
+      
+      <extension point="org.eclipse.ui.popupMenus"> 
+	
+	   	   	<objectContribution 
+	      id="org.eclipse.ui.articles.action.contribution.popup.object"
+	   objectClass="org.eclipse.core.resources.IContainer"
+	   nameFilter="*">
+	      <action
+	         id="org.eclipse.ui.articles.action.contribution.object.newSoarProblemSpaceOnFile" 
+	         label="New Soar Problem Space"
+	         icon="icons/s_flag.gif"
+	         menubarPath="soar" 
+	      class="edu.umich.soar.editor.actions.NewSoarProblemSpaceAction"> 
+	      </action>
+	   </objectContribution> 
+	   
+	   <!--
+	   	   	   	<objectContribution 
 	      id="org.eclipse.ui.articles.action.contribution.popup.object"
 	   objectClass="org.eclipse.core.resources.IFile"
-	   nameFilter="*.dm">
+	   nameFilter="*.soar">
 	      <action
-	         id="org.eclipse.ui.articles.action.contribution.object.action1" 
-	         label="Explode Datamap"
+	         id="org.eclipse.ui.articles.action.contribution.object.newSoarProblemSpace" 
+	         label="New Soar Problem Space"
 	         icon="icons/s_flag.gif"
-	         menubarPath="additions" 
-	      class="edu.umich.soar.editor.actions.ExplodeDatamapAction"> 
-	      </action> 
+	         menubarPath="soar" 
+	      class="edu.umich.soar.editor.actions.NewSoarProblemSpaceAction"> 
+	      </action>
 	   </objectContribution> 
+	   -->
+	
+	<objectContribution 
+	      id="org.eclipse.ui.articles.action.contribution.popup.object"
+	   objectClass="org.eclipse.core.resources.IContainer"
+	   nameFilter="*">
+	      <action
+	         id="org.eclipse.ui.articles.action.contribution.object.newSoarDatmapAction" 
+	         label="New Soar Datamap"
+	         icon="icons/s_flag.gif"
+	         menubarPath="soar" 
+	      class="edu.umich.soar.editor.actions.NewSoarDatamapAction"> 
+	      </action>
+	   </objectContribution> 
+
+	   	<objectContribution 
+	      id="org.eclipse.ui.articles.action.contribution.popup.object"
+	   objectClass="org.eclipse.core.resources.IContainer"
+	   nameFilter="*">
+	      <action
+	         id="org.eclipse.ui.articles.action.contribution.object.newSoarFileAction" 
+	         label="New Soar File"
+	         icon="icons/s_flag.gif"
+	         menubarPath="soar" 
+	      class="edu.umich.soar.editor.actions.NewSoarFileAction"> 
+	      </action>
+	   </objectContribution> 
+	   
 	</extension>
  <extension
        point="org.eclipse.ui.views">
