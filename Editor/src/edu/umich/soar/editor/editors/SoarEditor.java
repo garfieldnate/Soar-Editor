@@ -203,9 +203,12 @@ public class SoarEditor extends TextEditor implements DatamapChangedListener
         {
             for (IResource member : parent.members())
             {
-                if (member instanceof IFile && member.getFileExtension().equalsIgnoreCase("dm"))
+                if (member instanceof IFile)
                 {
-                    ret.add((IFile) member);
+                    String extension = member.getFileExtension();
+                    if (extension != null && extension.equalsIgnoreCase("dm")) {
+                        ret.add((IFile) member);
+                    }
                 }
             }
         }

@@ -11,7 +11,6 @@ public class SoarProblemSpaceWizardPage extends WizardNewFolderMainPage {
         super("Soar Problem Space", selection);
         setTitle("Soar Problem Space");
         setDescription("Creates a new Soar Problem Space");
-        //setFileExtension("soar");
         this.wizard = wizard;
     }
 
