@@ -6,6 +6,11 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
+/**
+ * This is a very simple wizard that allows the user to create a new data map
+ * which contains some default data.
+ * 
+ */
 public class DatamapFileWizard extends Wizard implements INewWizard {
 
     private IStructuredSelection selection;

@@ -19,6 +19,11 @@ public class DatamapFileWizardPage extends WizardNewFileCreationPage {
         setFileExtension("dm");
     }
 
+	/**
+	 * The initial contents of a datamap file are contained in
+	 * resources/default.dm. The file is customized slightly to use the name of
+	 * the file as the top state name.
+	 */
     @Override
     protected InputStream getInitialContents() {
         try {
