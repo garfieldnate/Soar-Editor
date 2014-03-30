@@ -148,6 +148,7 @@
     <wizard
           category="edu.umich.soar.editor.wizards.SoarCategory"
           class="edu.umich.soar.editor.wizards.SoarProjectWizard"
+          finalPerspective="edu.soar.editor.perspectives.SoarPerspective"
           icon="icons/a_flag.gif"
           id="edu.umich.soar.editor.wizards.SoarProjectWizard"
           name="Soar Project"
@@ -423,6 +424,16 @@ sp {${problemspace}*elaborate-operator*${operator}
              relative="org.eclipse.ui.editorss">
        </view>
     </perspectiveExtension>
+ </extension>
+ <extension
+       id="edu.umich.soar.editor.projectNature"
+       name="Soar Project Nature"
+       point="org.eclipse.core.resources.natures">
+    <runtime>
+       <run
+             class="edu.umich.soar.editor.natures.ProjectNature">
+       </run>
+    </runtime>
  </extension>
  
 </plugin>

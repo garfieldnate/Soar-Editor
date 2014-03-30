@@ -1,18 +1,27 @@
 package edu.umich.soar.editor.wizards;
 
+import java.net.URI;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
+
+import edu.umich.soar.editor.projects.SoarProjectSupport;
 
 /**
  * Short wizard for creating a new Soar project.
  * @author Nate Glenn
  *
  */
-public class SoarProjectWizard extends Wizard implements INewWizard {
+public class SoarProjectWizard extends Wizard implements INewWizard, IExecutableExtension {
 	private WizardNewProjectCreationPage pageOne;
+	private IConfigurationElement configurationElement;
 
 	private static final String WIZARD_NAME = "Soar Project Wizard"; //$NON-NLS-1$
 	private static final String PAGE_NAME = "Soar Project"; //$NON-NLS-1$
@@ -27,6 +36,10 @@ public class SoarProjectWizard extends Wizard implements INewWizard {
 
 	}
 
+	/**
+	 * There's only one page in this wizard, and it simply allows the user to 
+	 * create a new project with a given name.
+	 */
 	@Override
 	public void addPages() {
 		super.addPages();
@@ -39,10 +52,27 @@ public class SoarProjectWizard extends Wizard implements INewWizard {
 		addPage(pageOne);
 	}
 
+	/**
+	 * Create the default project structure and update the perspective
+	 */
 	@Override
 	public boolean performFinish() {
-		// TODO Auto-generated method stub
-		return true;
+	    String name = pageOne.getProjectName();
+	    URI location = null;
+	    if (!pageOne.useDefaults()) {
+	        location = pageOne.getLocationURI();
+	    } // else location == null
+	 
+	    SoarProjectSupport.createProject(name, location);
+	    BasicNewProjectResourceWizard.updatePerspective(configurationElement);
+	    return true;
+	}
+
+	@Override
+	public void setInitializationData(IConfigurationElement config,
+			String propertyName, Object data) throws CoreException {
+		configurationElement = config;
+		
 	}
 
 }
