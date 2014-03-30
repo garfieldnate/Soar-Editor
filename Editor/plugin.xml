@@ -145,6 +145,14 @@
     	   <description>New Soar Problem Space</description>
 	   <selection class="org.eclipse.core.resources.IResource"/>
 	</wizard>
+    <wizard
+          category="edu.umich.soar.editor.wizards.SoarCategory"
+          class="edu.umich.soar.editor.wizards.SoarProjectWizard"
+          icon="icons/a_flag.gif"
+          id="edu.umich.soar.editor.wizards.SoarProjectWizard"
+          name="Soar Project"
+          project="true">
+    </wizard>
 	
 	</extension>
 	
@@ -303,6 +311,12 @@ sp {${problemspace}*elaborate-operator*${operator}
 	</extension>
  <extension
        point="org.eclipse.ui.views">
+    <view
+          class="org.eclipse.ui.navigator.CommonNavigator"
+          icon="icons/a_flag.gif"
+          id="edu.umich.soar.editor.wizards.project.navigator"
+          name="Soar Project Navigator">
+    </view>
  </extension>
  
   <extension
@@ -322,6 +336,93 @@ sp {${problemspace}*elaborate-operator*${operator}
       <markerResolutionGenerator
          markerType="org.eclipse.core.resources.problemmarker"
          class="edu.umich.soar.editor.editors.fix.SoarFixer"/>
+ </extension>
+ <extension
+       point="org.eclipse.ui.navigator.viewer">
+    <viewerActionBinding
+          viewerId="edu.umich.soar.editor.wizards.project.navigator">
+       <includes>
+          <actionExtension
+                pattern="org.eclipse.ui.navigator.resources.*">
+          </actionExtension>
+       </includes>
+    </viewerActionBinding>
+    <viewerContentBinding
+          viewerId="edu.umich.soar.editor.wizards.project.navigator">
+       <includes>
+          <contentExtension
+                pattern="org.eclipse.ui.navigator.resourceContent">
+          </contentExtension>
+          <contentExtension
+                pattern="org.eclipse.ui.navigator.resources.filters.*">
+          </contentExtension>
+          <contentExtension
+                pattern="org.eclipse.ui.navigator.resources.linkHelper">
+          </contentExtension>
+          <contentExtension
+                pattern="org.eclipse.ui.navigator.resources.workingSets">
+          </contentExtension>
+       </includes>
+    </viewerContentBinding>
+    <viewerActionBinding
+          viewerId="edu.umich.soar.editor.wizards.project.navigator">
+       <includes>
+          <actionExtension
+                pattern="org.eclipse.ui.navigator.resources.*">
+          </actionExtension>
+       </includes>
+    </viewerActionBinding>
+    <viewerContentBinding
+          viewerId="edu.umich.soar.editor.wizards.project.navigator">
+       <includes>
+          <contentExtension
+                pattern="org.eclipse.ui.navigator.resourceContent">
+          </contentExtension>
+          <contentExtension
+                pattern="org.eclipse.ui.navigator.resources.filters.*">
+          </contentExtension>
+          <contentExtension
+                pattern="org.eclipse.ui.navigator.resources.linkHelper">
+          </contentExtension>
+          <contentExtension
+                pattern="org.eclipse.ui.navigator.resources.workingSets">
+          </contentExtension>
+       </includes>
+    </viewerContentBinding>
+ </extension>
+ <extension
+       point="org.eclipse.ui.perspectiveExtensions">
+    <perspectiveExtension
+          targetID="org.eclipse.ui.resourcePerspective">
+       <view
+             id="edu.umich.soar.editor.wizards.project.navigator"
+             ratio="0.5"
+             relationship="stack"
+             relative="org.eclipse.ui.navigator.ProjectExplorer">
+       </view>
+    </perspectiveExtension>
+ </extension>
+ <extension
+       point="org.eclipse.ui.perspectives">
+    <perspective
+          class="edu.umich.soar.editor.perspectives.SoarPerspective"
+          icon="icons/a_flag.gif"
+          id="edu.soar.editor.perspectives.SoarPerspective"
+          name="Soar Perspective">
+    </perspective>
+ </extension>
+ <extension
+       point="org.eclipse.ui.perspectiveExtensions">
+    <perspectiveExtension
+          targetID="edu.soar.editor.perspectives.SoarPerspective">
+       <view
+             id="edu.umich.soar.editor.wizards.project.navigator"
+             minimized="false"
+             ratio=".25"
+             relationship="left"
+             relative="org.eclipse.ui.editorss">
+       </view>
+    </perspectiveExtension>
  </extension>
  
 </plugin>
